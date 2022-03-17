@@ -1,7 +1,6 @@
 package me.sd_master92.core.plugin
 
 import me.sd_master92.core.file.CustomFile
-import me.sd_master92.core.models.VersionInfo
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
@@ -93,6 +92,11 @@ abstract class CustomPlugin @JvmOverloads constructor(
         e?.let { println(it.toString()) }
     }
 
+    fun getVersionInfo(): VersionInfo
+    {
+        return VersionInfo(this)
+    }
+
     companion object
     {
         var NAME: String = "Unknown"
@@ -108,5 +112,29 @@ abstract class CustomPlugin @JvmOverloads constructor(
         NAME = description.name
         VERSION = description.version
         description.authors[0]?.let { AUTHOR = it }
+    }
+}
+
+class VersionInfo(plugin: CustomPlugin)
+{
+
+    var upToDate = false
+        private set
+    var latestVersion = "1.0"
+        private set
+
+    init
+    {
+        this.latestVersion = try
+        {
+            val connection =
+                URL("https://api.spigotmc.org/legacy/update.php?resource=${plugin.spigot}").openConnection() as HttpsURLConnection
+            connection.requestMethod = "GET"
+            BufferedReader(InputStreamReader(connection.inputStream)).readLine()
+        } catch (e: Exception)
+        {
+            "1.0"
+        }
+        upToDate = CustomPlugin.VERSION.equals(this.latestVersion, true)
     }
 }
