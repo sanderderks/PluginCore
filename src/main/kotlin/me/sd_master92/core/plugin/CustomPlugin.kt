@@ -8,6 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.URL
+import java.util.*
 import javax.net.ssl.HttpsURLConnection
 
 abstract class CustomPlugin @JvmOverloads constructor(
@@ -16,6 +17,11 @@ abstract class CustomPlugin @JvmOverloads constructor(
 ) : JavaPlugin()
 {
     lateinit var config: CustomFile
+    val pluginName = description.name
+    val version = description.version
+    val author = description.authors[0] ?: "sd_master92"
+
+    private var versionLastChecked = Calendar.getInstance()
 
     protected abstract fun enable()
     protected abstract fun disable()
@@ -23,9 +29,9 @@ abstract class CustomPlugin @JvmOverloads constructor(
     override fun onEnable()
     {
         infoLog("")
-        infoLog("                      $NAME")
+        infoLog("                      $pluginName")
         infoLog(">----------------------------------------------------")
-        infoLog("                     By $AUTHOR")
+        infoLog("                     By $author")
         if (spigot > 0)
         {
             checkUpdates()
@@ -35,7 +41,7 @@ abstract class CustomPlugin @JvmOverloads constructor(
         if (isEnabled)
         {
             infoLog("")
-            infoLog(ChatColor.GREEN.toString() + "v$VERSION has been enabled.")
+            infoLog(ChatColor.GREEN.toString() + "v$version has been enabled.")
             infoLog("")
             infoLog(">----------------------------------------------------")
         }
@@ -45,7 +51,7 @@ abstract class CustomPlugin @JvmOverloads constructor(
     {
         disable()
         infoLog("")
-        infoLog(ChatColor.RED.toString() + "v$VERSION has been disabled.")
+        infoLog(ChatColor.RED.toString() + "v$version has been disabled.")
         infoLog("")
         infoLog(">----------------------------------------------------")
     }
@@ -54,7 +60,7 @@ abstract class CustomPlugin @JvmOverloads constructor(
     {
         player.sendMessage(
             ChatColor.GRAY.toString() + "Download " + ChatColor.LIGHT_PURPLE +
-                    "CustomVoting " + ChatColor.GRAY + "v" + VersionInfo(this).latestVersion + ":"
+                    "CustomVoting " + ChatColor.GRAY + "v$latestVersion:"
         )
         player.sendMessage(ChatColor.GREEN.toString() + "https://www.spigotmc.org/resources/$spigot/")
     }
@@ -64,14 +70,13 @@ abstract class CustomPlugin @JvmOverloads constructor(
         infoLog("")
         infoLog("| checking for updates")
         infoLog("|")
-        val versionInfo = VersionInfo(this)
-        if (versionInfo.upToDate)
+        if (isUpToDate())
         {
             infoLog("|___up to date!")
         } else
         {
             errorLog("|   a new version is available")
-            errorLog("|   download $NAME v${versionInfo.latestVersion} at:")
+            errorLog("|   download $pluginName v${latestVersion} at:")
             errorLog("|___https://www.spigotmc.org/resources/$spigot/")
         }
     }
@@ -83,58 +88,40 @@ abstract class CustomPlugin @JvmOverloads constructor(
 
     fun infoLog(message: String)
     {
-        server.consoleSender.sendMessage("[$NAME] $message")
+        server.consoleSender.sendMessage("[$pluginName] $message")
     }
 
     fun errorLog(message: String, e: Exception? = null)
     {
-        server.consoleSender.sendMessage(ChatColor.YELLOW.toString() + "[$NAME] " + ChatColor.RESET + message)
+        server.consoleSender.sendMessage(ChatColor.YELLOW.toString() + "[$pluginName] " + ChatColor.RESET + message)
         e?.let { println(it.toString()) }
     }
 
-    fun getVersionInfo(): VersionInfo
+    fun isUpToDate(): Boolean
     {
-        return VersionInfo(this)
+        return version.equals(latestVersion, true)
     }
 
-    companion object
-    {
-        var NAME: String = "Unknown"
-            private set
-        var VERSION: String = "1.0"
-            private set
-        var AUTHOR: String = "sd_master92"
-            private set
-    }
-
-    init
-    {
-        NAME = description.name
-        VERSION = description.version
-        description.authors[0]?.let { AUTHOR = it }
-    }
-}
-
-class VersionInfo(plugin: CustomPlugin)
-{
-
-    var upToDate = false
+    var latestVersion: String = "1.0"
         private set
-    var latestVersion = "1.0"
-        private set
-
-    init
-    {
-        this.latestVersion = try
+        get()
         {
-            val connection =
-                URL("https://api.spigotmc.org/legacy/update.php?resource=${plugin.spigot}").openConnection() as HttpsURLConnection
-            connection.requestMethod = "GET"
-            BufferedReader(InputStreamReader(connection.inputStream)).readLine()
-        } catch (e: Exception)
-        {
-            "1.0"
+            if (Calendar.getInstance()[Calendar.DAY_OF_YEAR] != versionLastChecked[Calendar.DAY_OF_YEAR]
+                || Calendar.getInstance()[Calendar.HOUR_OF_DAY] - versionLastChecked[Calendar.HOUR_OF_DAY] >= 1
+            )
+            {
+                latestVersion = try
+                {
+                    val connection =
+                        URL("https://api.spigotmc.org/legacy/update.php?resource=$spigot").openConnection() as HttpsURLConnection
+                    connection.requestMethod = "GET"
+                    BufferedReader(InputStreamReader(connection.inputStream)).readLine()
+                } catch (e: Exception)
+                {
+                    "1.0"
+                }
+                versionLastChecked = Calendar.getInstance()
+            }
+            return field;
         }
-        upToDate = CustomPlugin.VERSION.equals(this.latestVersion, true)
-    }
 }
