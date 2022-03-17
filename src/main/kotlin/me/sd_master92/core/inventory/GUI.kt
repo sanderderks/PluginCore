@@ -17,25 +17,26 @@ import org.bukkit.inventory.ItemStack
 abstract class GUI @JvmOverloads constructor(
     plugin: CustomPlugin,
     name: String,
-    size: Int,
-    allowDrag: Boolean,
-    alwaysCancel: Boolean = false
+    size: Int = 9,
+    allowDrag: Boolean = false,
+    alwaysCancelEvent: Boolean = false
 ) : Listener
 {
     val inventory: Inventory
     val name: String
     private val allowDrag: Boolean
-    private val alwaysCancel: Boolean
+    private val alwaysCancelEvent: Boolean
     private var cancelCloseEvent: Boolean
 
     abstract fun onClick(event: InventoryClickEvent, player: Player, item: ItemStack)
+    abstract fun onClose(event: InventoryCloseEvent, player: Player)
 
     @EventHandler
     fun onInventoryClick(event: InventoryClickEvent)
     {
         if (isThisInventory(event))
         {
-            if (alwaysCancel)
+            if (alwaysCancelEvent)
             {
                 event.isCancelled = true
             }
@@ -45,8 +46,6 @@ abstract class GUI @JvmOverloads constructor(
             }
         }
     }
-
-    abstract fun onClose(event: InventoryCloseEvent, player: Player)
 
     @EventHandler
     fun onInventoryClose(event: InventoryCloseEvent)
@@ -96,7 +95,7 @@ abstract class GUI @JvmOverloads constructor(
         this.name = name
         this.allowDrag = allowDrag
         cancelCloseEvent = false
-        this.alwaysCancel = alwaysCancel
+        this.alwaysCancelEvent = alwaysCancelEvent
         init(plugin)
     }
 }
