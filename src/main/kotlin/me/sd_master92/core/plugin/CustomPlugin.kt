@@ -93,20 +93,6 @@ abstract class CustomPlugin @JvmOverloads constructor(
         e?.let { println(it.toString()) }
     }
 
-    fun getLatestVersion(): String
-    {
-        return try
-        {
-            val connection =
-                URL("https://api.spigotmc.org/legacy/update.php?resource=$spigot").openConnection() as HttpsURLConnection
-            connection.requestMethod = "GET"
-            BufferedReader(InputStreamReader(connection.inputStream)).readLine()
-        } catch (e: Exception)
-        {
-            "1.0"
-        }
-    }
-
     companion object
     {
         var NAME: String = "Unknown"
