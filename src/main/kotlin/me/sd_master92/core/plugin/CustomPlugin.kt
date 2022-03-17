@@ -21,7 +21,7 @@ abstract class CustomPlugin @JvmOverloads constructor(
     val version = description.version
     val author = description.authors[0] ?: "sd_master92"
 
-    private var versionLastChecked = Calendar.getInstance()
+    private var versionLastChecked: Calendar? = null
 
     protected abstract fun enable()
     protected abstract fun disable()
@@ -106,8 +106,9 @@ abstract class CustomPlugin @JvmOverloads constructor(
         private set
         get()
         {
-            if (Calendar.getInstance()[Calendar.DAY_OF_YEAR] != versionLastChecked[Calendar.DAY_OF_YEAR]
-                || Calendar.getInstance()[Calendar.HOUR_OF_DAY] - versionLastChecked[Calendar.HOUR_OF_DAY] >= 1
+            if (versionLastChecked == null
+                || Calendar.getInstance()[Calendar.DAY_OF_YEAR] != versionLastChecked!![Calendar.DAY_OF_YEAR]
+                || Calendar.getInstance()[Calendar.HOUR_OF_DAY] - versionLastChecked!![Calendar.HOUR_OF_DAY] >= 1
             )
             {
                 latestVersion = try
