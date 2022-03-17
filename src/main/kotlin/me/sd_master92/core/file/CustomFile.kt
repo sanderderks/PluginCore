@@ -26,8 +26,6 @@ open class CustomFile(folder: File, name: String, plugin: Plugin) : YamlConfigur
      * @param plugin main plugin class
      */
     constructor(name: String, plugin: Plugin) : this(plugin.dataFolder, name, plugin)
-    {
-    }
 
     /**
      * save config

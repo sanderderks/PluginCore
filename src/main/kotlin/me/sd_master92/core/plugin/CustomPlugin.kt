@@ -1,6 +1,7 @@
 package me.sd_master92.core.plugin
 
 import me.sd_master92.core.file.CustomFile
+import me.sd_master92.core.models.VersionInfo
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
@@ -12,7 +13,7 @@ import javax.net.ssl.HttpsURLConnection
 
 abstract class CustomPlugin @JvmOverloads constructor(
     private val configName: String = "config.yml",
-    private val spigot: Int = 0
+    val spigot: Int = 0
 ) : JavaPlugin()
 {
     lateinit var config: CustomFile
@@ -35,7 +36,7 @@ abstract class CustomPlugin @JvmOverloads constructor(
         if (isEnabled)
         {
             infoLog("")
-            infoLog(ChatColor.GREEN.toString() + "v" + VERSION + " has been enabled.")
+            infoLog(ChatColor.GREEN.toString() + "v$VERSION has been enabled.")
             infoLog("")
             infoLog(">----------------------------------------------------")
         }
@@ -45,65 +46,34 @@ abstract class CustomPlugin @JvmOverloads constructor(
     {
         disable()
         infoLog("")
-        infoLog(ChatColor.RED.toString() + "v" + VERSION + " has been disabled.")
+        infoLog(ChatColor.RED.toString() + "v$VERSION has been disabled.")
         infoLog("")
         infoLog(">----------------------------------------------------")
     }
-
-    val resourceUrl: URL?
-        get() = try
-        {
-            URL(
-                "https://api.spigotmc.org/legacy/update" +
-                        ".php?resource=" + spigot
-            )
-        } catch (e: Exception)
-        {
-            null
-        }
 
     fun sendDownloadUrl(player: Player)
     {
         player.sendMessage(
             ChatColor.GRAY.toString() + "Download " + ChatColor.LIGHT_PURPLE +
-                    "CustomVoting " + ChatColor.GRAY + "v" + latestVersion + ":"
+                    "CustomVoting " + ChatColor.GRAY + "v" + VersionInfo(this).latestVersion + ":"
         )
         player.sendMessage(ChatColor.GREEN.toString() + "https://www.spigotmc.org/resources/$spigot/")
     }
-
-    val isUpToDate: Boolean
-        get() = VERSION.equals(latestVersion, ignoreCase = true)
-    val latestVersion: String?
-        get() = try
-        {
-            val connection = resourceUrl!!.openConnection() as HttpsURLConnection
-            connection.requestMethod = "GET"
-            BufferedReader(InputStreamReader(connection.inputStream)).readLine()
-        } catch (e: Exception)
-        {
-            null
-        }
 
     private fun checkUpdates()
     {
         infoLog("")
         infoLog("| checking for updates")
         infoLog("|")
-        val latestVersion = latestVersion
-        if (latestVersion != null)
+        val versionInfo = VersionInfo(this)
+        if (versionInfo.upToDate)
         {
-            if (VERSION.equals(latestVersion, ignoreCase = true))
-            {
-                infoLog("|___up to date!")
-            } else
-            {
-                errorLog("|   a new version is available")
-                errorLog("|   download $NAME v$latestVersion at:")
-                errorLog("|___https://www.spigotmc.org/resources/$spigot/")
-            }
+            infoLog("|___up to date!")
         } else
         {
-            errorLog("|___could not check for updates")
+            errorLog("|   a new version is available")
+            errorLog("|   download $NAME v${versionInfo.latestVersion} at:")
+            errorLog("|___https://www.spigotmc.org/resources/$spigot/")
         }
     }
 
@@ -119,8 +89,22 @@ abstract class CustomPlugin @JvmOverloads constructor(
 
     fun errorLog(message: String, e: Exception? = null)
     {
-        server.consoleSender.sendMessage(ChatColor.YELLOW.toString() + "[" + NAME + "] " + ChatColor.RESET + message)
+        server.consoleSender.sendMessage(ChatColor.YELLOW.toString() + "[$NAME] " + ChatColor.RESET + message)
         e?.let { println(it.toString()) }
+    }
+
+    fun getLatestVersion(): String
+    {
+        return try
+        {
+            val connection =
+                URL("https://api.spigotmc.org/legacy/update.php?resource=$spigot").openConnection() as HttpsURLConnection
+            connection.requestMethod = "GET"
+            BufferedReader(InputStreamReader(connection.inputStream)).readLine()
+        } catch (e: Exception)
+        {
+            "1.0"
+        }
     }
 
     companion object
