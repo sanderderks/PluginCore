@@ -2,6 +2,8 @@ package me.sd_master92.core.inventory
 
 import me.sd_master92.core.plugin.CustomPlugin
 import org.bukkit.Bukkit
+import org.bukkit.ChatColor
+import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -80,6 +82,12 @@ abstract class GUI @JvmOverloads constructor(
     private fun init(plugin: CustomPlugin)
     {
         plugin.registerListener(this)
+    }
+
+    companion object
+    {
+        val BACK_ITEM = BaseItem(Material.BARRIER, ChatColor.RED.toString() + "Back")
+        val SAVE_ITEM = BaseItem(Material.WRITABLE_BOOK, ChatColor.GREEN.toString() + "Save")
     }
 
     init
