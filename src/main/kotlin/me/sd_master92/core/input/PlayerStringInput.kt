@@ -10,7 +10,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.scheduler.BukkitRunnable
 
-abstract class PlayerChatInput(
+abstract class PlayerStringInput(
     private val plugin: CustomPlugin,
     private val player: Player,
     private val allowCancel: Boolean = true
