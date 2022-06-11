@@ -22,11 +22,7 @@ class CustomTable(
 
     fun create(column: String, dataType: DataType): Boolean
     {
-        val statement =
-            database.connection!!.prepareStatement("CREATE TABLE ? (? ?)")
-        statement.setString(1, name)
-        statement.setString(2, column)
-        statement.setString(3, dataType.value)
+        val statement = database.connection!!.prepareStatement("CREATE TABLE $name ($column ${dataType.value})")
         return database.execute(statement)
     }
 
@@ -40,8 +36,7 @@ class CustomTable(
 
     fun delete(table: String): Boolean
     {
-        val statement = database.connection!!.prepareStatement("DROP TABLE ?")
-        statement.setString(1, table)
+        val statement = database.connection!!.prepareStatement("DROP TABLE $table")
         return database.execute(statement)
     }
 
@@ -66,11 +61,9 @@ class CustomTable(
         }
         placeholders.deleteCharAt(placeholders.length - 1)
 
-        val statement =
-            database.connection!!.prepareStatement("INSERT INTO ? (?) VALUES ($placeholders)")
-        statement.setString(1, name)
-        statement.setString(2, columnsAsString.toString())
-        var i = 3
+        val statement = database.connection!!.prepareStatement("INSERT INTO $name (?) VALUES ($placeholders)")
+        statement.setString(1, columnsAsString.toString())
+        var i = 2
         for (value in values)
         {
             statement.setValue(i, value)
@@ -82,40 +75,29 @@ class CustomTable(
     fun updateData(whereColumn: String, whereValue: Any, updateColumn: String, updateValue: Any): Boolean
     {
         val statement =
-            database.connection!!.prepareStatement("UPDATE ? SET ?=? WHERE ?=?")
-        statement.setString(1, name)
-        statement.setString(2, whereColumn)
-        statement.setValue(3, whereValue)
-        statement.setString(4, updateColumn)
-        statement.setValue(5, updateValue)
+            database.connection!!.prepareStatement("UPDATE $name SET $whereColumn=? WHERE $updateColumn=?")
+        statement.setValue(1, whereValue)
+        statement.setValue(2, updateValue)
         return database.execute(statement)
     }
 
     fun getData(column: String, value: Any): ResultSet
     {
-        val statement =
-            database.connection!!.prepareStatement("SELECT * FROM ? WHERE ?=?")
-        statement.setString(1, name)
-        statement.setString(2, column)
-        statement.setValue(3, value)
+        val statement = database.connection!!.prepareStatement("SELECT * FROM $name WHERE $column=?")
+        statement.setValue(1, value)
         return database.query(statement)!!
     }
 
     fun getAll(): ResultSet
     {
-        val statement =
-            database.connection!!.prepareStatement("SELECT * FROM ?")
-        statement.setString(1, name)
+        val statement = database.connection!!.prepareStatement("SELECT * FROM $name")
         return database.query(statement)!!
     }
 
     fun deleteData(column: String, value: Any): Boolean
     {
-        val statement =
-            database.connection!!.prepareStatement("DELETE FROM ? WHERE ?=?")
-        statement.setString(1, name)
-        statement.setString(2, column)
-        statement.setValue(3, value)
+        val statement = database.connection!!.prepareStatement("DELETE FROM $name WHERE $column=?")
+        statement.setValue(1, value)
         return database.execute(statement)
     }
 }

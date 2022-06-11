@@ -18,11 +18,7 @@ class CustomColumn(val database: CustomDatabase, val table: CustomTable, val nam
 
     fun create(dataType: DataType): Boolean
     {
-        val statement =
-            database.connection!!.prepareStatement("ALTER TABLE ? ADD ? ?")
-        statement.setString(1, table.name)
-        statement.setString(2, name)
-        statement.setString(3, dataType.value)
+        val statement = database.connection!!.prepareStatement("ALTER TABLE ${table.name} ADD COLUMN $name ${dataType.value}")
         return database.execute(statement)
     }
 
@@ -36,20 +32,15 @@ class CustomColumn(val database: CustomDatabase, val table: CustomTable, val nam
 
     fun delete(): Boolean
     {
-        val statement =
-            database.connection!!.prepareStatement("ALTER TABLE ? DROP COLUMN ?")
-        statement.setString(1, table.name)
-        statement.setString(2, name)
+        val statement = database.connection!!.prepareStatement("ALTER TABLE ${table.name} DROP COLUMN $name")
         return database.execute(statement)
     }
 
     fun insertData(value: Any): Boolean
     {
-        val statement =
-            database.connection!!.prepareStatement("INSERT INTO ? (?) VALUES (?)")
-        statement.setString(1, table.name)
-        statement.setString(2, name)
-        statement.setValue(3, value)
+        val statement = database.connection!!.prepareStatement("INSERT INTO ${table.name} (?) VALUES (?)")
+        statement.setString(1, name)
+        statement.setValue(2, value)
         return database.execute(statement)
     }
 

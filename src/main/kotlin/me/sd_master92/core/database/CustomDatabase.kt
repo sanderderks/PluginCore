@@ -78,6 +78,7 @@ class CustomDatabase
         return try
         {
             statement.execute()
+            true
         } catch (e: Exception)
         {
             print(statement)
