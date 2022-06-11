@@ -3,6 +3,7 @@ package me.sd_master92.core.database
 import me.sd_master92.core.file.CustomFile
 import java.sql.Connection
 import java.sql.DriverManager
+import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
 
@@ -72,14 +73,11 @@ class CustomDatabase
             false
         }
 
-    fun execute(statement_: String): Boolean
+    fun execute(statement: PreparedStatement): Boolean
     {
-        var statement = statement_
-        statement = if (statement.endsWith(";")) statement else "$statement;"
         return try
         {
-            connection!!.createStatement().executeUpdate(statement)
-            true
+            statement.execute()
         } catch (e: Exception)
         {
             print(statement)
@@ -88,13 +86,11 @@ class CustomDatabase
         }
     }
 
-    fun query(statement_: String): ResultSet?
+    fun query(statement: PreparedStatement): ResultSet?
     {
-        var statement = statement_
-        statement = if (statement.endsWith(";")) statement else "$statement;"
         return try
         {
-            connection!!.createStatement().executeQuery(statement)
+            statement.executeQuery()
         } catch (e: Exception)
         {
             print(statement)
@@ -121,6 +117,6 @@ class CustomDatabase
 
     companion object
     {
-        private const val PREFIX = "[CustomFile] "
+        private const val PREFIX = "[PluginCore] "
     }
 }

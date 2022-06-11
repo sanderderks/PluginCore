@@ -1,6 +1,7 @@
 package me.sd_master92.core.database
 
 import me.sd_master92.core.database.CustomColumn.DataType
+import me.sd_master92.core.setValue
 import java.sql.ResultSet
 
 class CustomTable(
@@ -21,7 +22,12 @@ class CustomTable(
 
     fun create(column: String, dataType: DataType): Boolean
     {
-        return database.execute("CREATE TABLE " + name + " (" + column + " " + dataType.value + ")")
+        val statement =
+            database.connection!!.prepareStatement("CREATE TABLE ? (? ?)")
+        statement.setString(1, name)
+        statement.setString(2, column)
+        statement.setString(3, dataType.value)
+        return database.execute(statement)
     }
 
     fun createIFNotExists(column: String, dataType: DataType): Boolean
@@ -34,7 +40,9 @@ class CustomTable(
 
     fun delete(table: String): Boolean
     {
-        return database.execute("DROP TABLE $table")
+        val statement = database.connection!!.prepareStatement("DROP TABLE ?")
+        statement.setString(1, table)
+        return database.execute(statement)
     }
 
     fun getColumn(name: String): CustomColumn
@@ -42,7 +50,7 @@ class CustomTable(
         return CustomColumn(database, this, name)
     }
 
-    fun insertData(columns: Array<String>, values: Array<String>): Boolean
+    fun insertData(columns: Array<String>, values: Array<Any>): Boolean
     {
         val columnsAsString = StringBuilder()
         for (column in columns)
@@ -50,30 +58,64 @@ class CustomTable(
             columnsAsString.append(column).append(",")
         }
         columnsAsString.deleteCharAt(columnsAsString.length - 1)
-        val valuesAsString = StringBuilder()
+
+        val placeholders = StringBuilder()
         for (value in values)
         {
-            valuesAsString.append(value).append(",")
+            placeholders.append("?,")
         }
-        valuesAsString.deleteCharAt(valuesAsString.length - 1)
-        return database.execute("INSERT INTO $name ($columnsAsString) VALUES ($valuesAsString)")
+        placeholders.deleteCharAt(placeholders.length - 1)
+
+        val statement =
+            database.connection!!.prepareStatement("INSERT INTO ? (?) VALUES ($placeholders)")
+        statement.setString(1, name)
+        statement.setString(2, columnsAsString.toString())
+        var i = 3
+        for (value in values)
+        {
+            statement.setValue(i, value)
+            i++
+        }
+        return database.execute(statement)
     }
 
-    fun updateData(where: String, changes: String): Boolean
+    fun updateData(whereColumn: String, whereValue: Any, updateColumn: String, updateValue: Any): Boolean
     {
-        return database.execute("UPDATE $name SET $changes WHERE $where")
+        val statement =
+            database.connection!!.prepareStatement("UPDATE ? SET ?=? WHERE ?=?")
+        statement.setString(1, name)
+        statement.setString(2, whereColumn)
+        statement.setValue(3, whereValue)
+        statement.setString(4, updateColumn)
+        statement.setValue(5, updateValue)
+        return database.execute(statement)
     }
 
-    fun getData(where: String): ResultSet
+    fun getData(column: String, value: Any): ResultSet
     {
-        return database.query("SELECT * FROM $name WHERE $where")!!
+        val statement =
+            database.connection!!.prepareStatement("SELECT * FROM ? WHERE ?=?")
+        statement.setString(1, name)
+        statement.setString(2, column)
+        statement.setValue(3, value)
+        return database.query(statement)!!
     }
 
-    val all: ResultSet
-        get() = database.query("SELECT * FROM $name")!!
-
-    fun deleteData(where: String): Boolean
+    fun getAll(): ResultSet
     {
-        return database.execute("DELETE FROM $name WHERE $where")
+        val statement =
+            database.connection!!.prepareStatement("SELECT * FROM ?")
+        statement.setString(1, name)
+        return database.query(statement)!!
+    }
+
+    fun deleteData(column: String, value: Any): Boolean
+    {
+        val statement =
+            database.connection!!.prepareStatement("DELETE FROM ? WHERE ?=?")
+        statement.setString(1, name)
+        statement.setString(2, column)
+        statement.setValue(3, value)
+        return database.execute(statement)
     }
 }
