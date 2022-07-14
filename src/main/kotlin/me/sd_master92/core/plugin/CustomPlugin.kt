@@ -99,7 +99,25 @@ abstract class CustomPlugin @JvmOverloads constructor(
 
     fun isUpToDate(): Boolean
     {
-        return version.equals(latestVersion, true)
+        try
+        {
+            val subVersions = version.split(".").map { it.toInt() }
+            val latestSubVersions = latestVersion.split(".").map { it.toInt() }
+            subVersions.forEachIndexed { i, subVersion ->
+                val latestSubVersion = latestSubVersions[i]
+                if (subVersion > latestSubVersion)
+                {
+                    return true
+                } else if(subVersion < latestSubVersion)
+                {
+                    return false
+                }
+            }
+        } catch (_: Exception)
+        {
+            return false
+        }
+        return true
     }
 
     var latestVersion: String = "1.0"

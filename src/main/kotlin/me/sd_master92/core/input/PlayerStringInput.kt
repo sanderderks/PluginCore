@@ -65,7 +65,7 @@ abstract class PlayerStringInput(
         {
             cancel()
             onCancel()
-        } else
+        } else if(input.isNotEmpty())
         {
             onInputReceived(input)
         }
