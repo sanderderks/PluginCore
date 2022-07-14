@@ -49,6 +49,7 @@ class CustomColumn(val database: CustomDatabase, val table: CustomTable, val nam
         INT_PRIMARY("int"),
         VARCHAR_PRIMARY("varchar(255) PRIMARY KEY"),
         INT("int"),
+        BOOLEAN("bool"),
         LONG("bigint"),
         VARCHAR("varchar(255)");
 
