@@ -46,7 +46,7 @@ class CustomColumn(val database: CustomDatabase, val table: CustomTable, val nam
 
     enum class DataType(val value: String)
     {
-        INT_PRIMARY("int NOT NULL AUTO_INCREMENT"),
+        INT_PRIMARY("int PRIMARY KEY AUTO_INCREMENT"),
         VARCHAR_PRIMARY("varchar(255) PRIMARY KEY"),
         INT("int"),
         BOOLEAN("bool"),
