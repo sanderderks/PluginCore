@@ -66,7 +66,7 @@ open class CustomFile(folder: File, name: String, plugin: CustomPlugin) : YamlCo
      *
      * @return successful or not
      */
-    fun delete(): Boolean
+    open fun delete(): Boolean
     {
         return file!!.delete()
     }

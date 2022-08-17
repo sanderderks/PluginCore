@@ -28,6 +28,16 @@ open class PlayerFile private constructor(var uuid: String, private val plugin: 
         name = player.name
     }
 
+    override fun delete(): Boolean
+    {
+        if(super.delete())
+        {
+            ALL.remove(uuid)
+            return true
+        }
+        return false
+    }
+
     /**
      * save first join timestamp
      */
@@ -83,14 +93,12 @@ open class PlayerFile private constructor(var uuid: String, private val plugin: 
             if (!initialized)
             {
                 val files = File(plugin.dataFolder.toString() + File.separator + "players").listFiles()
-                plugin.infoLog("Caching ${files.size} playerfiles...")
                 ALL = if (files != null)
                 {
                     Arrays.stream(files).map { file: File -> PlayerFile(file.name.replace(".yml", ""), plugin) }
                         .collect(Collectors.toList()).associateBy { file -> file.uuid }.toMutableMap()
                 } else HashMap()
                 initialized = true
-                plugin.infoLog("Finished caching playerfiles!")
             }
         }
 
