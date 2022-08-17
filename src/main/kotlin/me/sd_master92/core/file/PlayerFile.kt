@@ -1,6 +1,5 @@
 package me.sd_master92.core.file
 
-import me.sd_master92.core.infoLog
 import me.sd_master92.core.plugin.CustomPlugin
 import org.bukkit.entity.Player
 import java.io.File
@@ -85,21 +84,16 @@ open class PlayerFile private constructor(var uuid: String, private val plugin: 
 
     companion object
     {
-        private var initialized = false
         private var ALL: MutableMap<String, PlayerFile> = HashMap()
 
         fun init(plugin: CustomPlugin)
         {
-            if (!initialized)
+            val files = File(plugin.dataFolder.toString() + File.separator + "players").listFiles()
+            ALL = if (files != null)
             {
-                val files = File(plugin.dataFolder.toString() + File.separator + "players").listFiles()
-                ALL = if (files != null)
-                {
-                    Arrays.stream(files).map { file: File -> PlayerFile(file.name.replace(".yml", ""), plugin) }
-                        .collect(Collectors.toList()).associateBy { file -> file.uuid }.toMutableMap()
-                } else HashMap()
-                initialized = true
-            }
+                Arrays.stream(files).map { file: File -> PlayerFile(file.name.replace(".yml", ""), plugin) }
+                    .collect(Collectors.toList()).associateBy { file -> file.uuid }.toMutableMap()
+            } else HashMap()
         }
 
         /**
