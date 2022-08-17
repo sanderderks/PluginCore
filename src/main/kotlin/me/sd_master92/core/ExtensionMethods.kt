@@ -1,5 +1,8 @@
 package me.sd_master92.core
 
+import me.sd_master92.core.plugin.CustomPlugin
+import org.bukkit.ChatColor
+import org.bukkit.plugin.java.JavaPlugin
 import java.sql.PreparedStatement
 
 fun String.appendWhenTrue(value: Boolean, append: String): String
@@ -31,4 +34,15 @@ fun PreparedStatement.setValue(i: Int, value: Any): PreparedStatement
         else      -> this.setString(i, value.toString())
     }
     return this
+}
+
+fun CustomPlugin.infoLog(message: String)
+{
+    server.consoleSender.sendMessage("[$pluginName] $message")
+}
+
+fun CustomPlugin.errorLog(message: String, e: Exception? = null)
+{
+    server.consoleSender.sendMessage(ChatColor.YELLOW.toString() + "[$pluginName] " + ChatColor.RESET + message)
+    e?.let { println(it.toString()) }
 }

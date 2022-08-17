@@ -1,11 +1,11 @@
 package me.sd_master92.core.file
 
+import me.sd_master92.core.plugin.CustomPlugin
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.inventory.ItemStack
-import org.bukkit.plugin.Plugin
 import java.io.File
 
 /**
@@ -15,7 +15,7 @@ import java.io.File
  * @param name   name of this CustomFile
  * @param plugin main plugin class
  */
-open class CustomFile(folder: File, name: String, plugin: Plugin) : YamlConfiguration()
+open class CustomFile(folder: File, name: String, plugin: CustomPlugin) : YamlConfiguration()
 {
     private var file: File? = null
 
@@ -25,7 +25,7 @@ open class CustomFile(folder: File, name: String, plugin: Plugin) : YamlConfigur
      * @param name   name of this CustomFile
      * @param plugin main plugin class
      */
-    constructor(name: String, plugin: Plugin) : this(plugin.dataFolder, name, plugin)
+    constructor(name: String, plugin: CustomPlugin) : this(plugin.dataFolder, name, plugin)
 
     /**
      * save config

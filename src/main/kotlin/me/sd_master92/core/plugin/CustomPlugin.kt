@@ -1,6 +1,8 @@
 package me.sd_master92.core.plugin
 
+import me.sd_master92.core.errorLog
 import me.sd_master92.core.file.CustomFile
+import me.sd_master92.core.infoLog
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
@@ -84,17 +86,6 @@ abstract class CustomPlugin @JvmOverloads constructor(
     fun registerListener(listener: Listener)
     {
         server.pluginManager.registerEvents(listener, this)
-    }
-
-    fun infoLog(message: String)
-    {
-        server.consoleSender.sendMessage("[$pluginName] $message")
-    }
-
-    fun errorLog(message: String, e: Exception? = null)
-    {
-        server.consoleSender.sendMessage(ChatColor.YELLOW.toString() + "[$pluginName] " + ChatColor.RESET + message)
-        e?.let { println(it.toString()) }
     }
 
     fun isUpToDate(): Boolean

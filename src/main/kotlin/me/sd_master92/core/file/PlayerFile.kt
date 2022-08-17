@@ -1,7 +1,8 @@
 package me.sd_master92.core.file
 
+import me.sd_master92.core.infoLog
+import me.sd_master92.core.plugin.CustomPlugin
 import org.bukkit.entity.Player
-import org.bukkit.plugin.Plugin
 import java.io.File
 import java.util.*
 import java.util.stream.Collectors
@@ -12,7 +13,7 @@ import java.util.stream.Collectors
  * @param uuid   uuid of this player
  * @param plugin main plugin class
  */
-open class PlayerFile private constructor(var uuid: String, private val plugin: Plugin) :
+open class PlayerFile private constructor(var uuid: String, private val plugin: CustomPlugin) :
     CustomFile(File(plugin.dataFolder.toString() + File.separator + "players"), "$uuid.yml", plugin)
 {
     /**
@@ -22,7 +23,7 @@ open class PlayerFile private constructor(var uuid: String, private val plugin: 
      * @param player the player
      * @param plugin main plugin class
      */
-    private constructor(player: Player, plugin: Plugin) : this(player.uniqueId.toString(), plugin)
+    private constructor(player: Player, plugin: CustomPlugin) : this(player.uniqueId.toString(), plugin)
     {
         name = player.name
     }
@@ -77,17 +78,19 @@ open class PlayerFile private constructor(var uuid: String, private val plugin: 
         private var initialized = false
         private var ALL: MutableMap<String, PlayerFile> = HashMap()
 
-        fun init(plugin: Plugin)
+        fun init(plugin: CustomPlugin)
         {
             if (!initialized)
             {
                 val files = File(plugin.dataFolder.toString() + File.separator + "players").listFiles()
+                plugin.infoLog("Caching ${files.size} playerfiles...")
                 ALL = if (files != null)
                 {
                     Arrays.stream(files).map { file: File -> PlayerFile(file.name.replace(".yml", ""), plugin) }
                         .collect(Collectors.toList()).associateBy { file -> file.uuid }.toMutableMap()
                 } else HashMap()
                 initialized = true
+                plugin.infoLog("Finished caching playerfiles!")
             }
         }
 
@@ -98,7 +101,7 @@ open class PlayerFile private constructor(var uuid: String, private val plugin: 
          * @param plugin main plugin class
          * @return PlayerFile or null
          */
-        fun get(plugin: Plugin, uuid: String): PlayerFile
+        fun get(plugin: CustomPlugin, uuid: String): PlayerFile
         {
             return ALL.getOrDefault(uuid, PlayerFile(uuid, plugin))
         }
@@ -110,7 +113,7 @@ open class PlayerFile private constructor(var uuid: String, private val plugin: 
          * @param plugin main plugin class
          * @return PlayerFile or null
          */
-        fun get(plugin: Plugin, player: Player): PlayerFile
+        fun get(plugin: CustomPlugin, player: Player): PlayerFile
         {
             return ALL.getOrDefault(player.uniqueId.toString(), PlayerFile(player, plugin))
         }
