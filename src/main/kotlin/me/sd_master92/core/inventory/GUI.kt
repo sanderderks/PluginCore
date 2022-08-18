@@ -12,22 +12,18 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.event.inventory.InventoryEvent
-import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
 abstract class GUI @JvmOverloads constructor(
     plugin: CustomPlugin,
-    name: String,
+    val name: String,
     size: Int = 9,
-    allowDrag: Boolean = false,
-    alwaysCancelEvent: Boolean = false
+    private val alwaysCancelEvent: Boolean = true
 ) : Listener
 {
-    val inventory: Inventory
-    val name: String
-    private val allowDrag: Boolean
-    private val alwaysCancelEvent: Boolean
-    private var cancelCloseEvent: Boolean
+    val inventory = Bukkit.createInventory(null, size, name)
+    var cancelCloseEvent = false
+    var keepAlive = false
 
     abstract fun onClick(event: InventoryClickEvent, player: Player, item: ItemStack)
     abstract fun onClose(event: InventoryCloseEvent, player: Player)
@@ -53,7 +49,10 @@ abstract class GUI @JvmOverloads constructor(
     {
         if (isThisInventory(event) && !cancelCloseEvent)
         {
-            HandlerList.unregisterAll(this)
+            if(!keepAlive)
+            {
+                HandlerList.unregisterAll(this)
+            }
             onClose(event, event.player as Player)
         }
     }
@@ -61,15 +60,10 @@ abstract class GUI @JvmOverloads constructor(
     @EventHandler
     fun onDrag(event: InventoryDragEvent)
     {
-        if (isThisInventory(event) && !allowDrag)
+        if (isThisInventory(event) && alwaysCancelEvent)
         {
             event.isCancelled = true
         }
-    }
-
-    fun cancelCloseEvent()
-    {
-        cancelCloseEvent = true
     }
 
     private fun isThisInventory(event: InventoryEvent): Boolean
@@ -93,11 +87,6 @@ abstract class GUI @JvmOverloads constructor(
 
     init
     {
-        inventory = Bukkit.createInventory(null, size, name)
-        this.name = name
-        this.allowDrag = allowDrag
-        cancelCloseEvent = false
-        this.alwaysCancelEvent = alwaysCancelEvent
         init(plugin)
     }
 }
