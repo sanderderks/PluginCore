@@ -1,6 +1,7 @@
 package me.sd_master92.core.file
 
 import me.sd_master92.core.plugin.CustomPlugin
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.io.File
 import java.util.*
@@ -103,7 +104,7 @@ open class PlayerFile private constructor(var uuid: String, private val plugin: 
          * @param plugin main plugin class
          * @return PlayerFile or null
          */
-        fun get(plugin: CustomPlugin, uuid: String): PlayerFile
+        fun getByUuid(plugin: CustomPlugin, uuid: String): PlayerFile
         {
             return ALL.getOrDefault(uuid, PlayerFile(uuid, plugin))
         }
@@ -111,20 +112,31 @@ open class PlayerFile private constructor(var uuid: String, private val plugin: 
         /**
          * get an existing player file
          *
-         * @param uuid   player
          * @param plugin main plugin class
+         * @param player player
          * @return PlayerFile or null
          */
-        fun get(plugin: CustomPlugin, player: Player): PlayerFile
+        fun getByUuid(plugin: CustomPlugin, player: Player): PlayerFile
         {
             return ALL.getOrDefault(player.uniqueId.toString(), PlayerFile(player, plugin))
+        }
+
+        /**
+         * get an existing player file
+         *
+         * @param plugin main plugin class
+         * @param player player
+         * @return PlayerFile or null
+         */
+        fun getByName(plugin: CustomPlugin, player: Player): PlayerFile
+        {
+            return ALL.values.firstOrNull { file -> file.name == player.name } ?: PlayerFile(player, plugin)
         }
 
         /**
          * get a PlayerFile by player name
          *
          * @param name   player name
-         * @param plugin main plugin class
          * @return PlayerFile or null
          */
         fun getByName(name: String): PlayerFile?
@@ -135,7 +147,6 @@ open class PlayerFile private constructor(var uuid: String, private val plugin: 
         /**
          * get all PlayerFiles
          *
-         * @param plugin main plugin class
          * @return empty or filled list of PlayerFiles
          */
         fun getAll(): Map<String, PlayerFile>
