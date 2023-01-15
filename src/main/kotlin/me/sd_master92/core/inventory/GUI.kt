@@ -66,7 +66,7 @@ abstract class GUI @JvmOverloads constructor(
         }
     }
 
-    private fun isThisInventory(event: InventoryEvent): Boolean
+    fun isThisInventory(event: InventoryEvent): Boolean
     {
         return if (event is InventoryClickEvent)
         {
