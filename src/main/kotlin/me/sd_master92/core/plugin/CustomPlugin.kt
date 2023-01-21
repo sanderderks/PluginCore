@@ -3,7 +3,6 @@ package me.sd_master92.core.plugin
 import me.sd_master92.core.errorLog
 import me.sd_master92.core.file.CustomFile
 import me.sd_master92.core.infoLog
-import me.sd_master92.core.listeners.EntityListener
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
@@ -40,7 +39,6 @@ abstract class CustomPlugin @JvmOverloads constructor(
             checkUpdates()
         }
         config = CustomFile(configName, this)
-        registerListener(EntityListener())
         enable()
         if (isEnabled)
         {
