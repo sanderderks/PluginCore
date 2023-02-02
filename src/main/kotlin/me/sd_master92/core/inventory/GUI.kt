@@ -21,7 +21,7 @@ abstract class GUI @JvmOverloads constructor(
     private val alwaysCancelEvent: Boolean = true
 ) : Listener
 {
-    val inventory = Bukkit.createInventory(null, size, name)
+    val inventory = Bukkit.createInventory(null, size, ChatColor.stripColor(name)!!)
     var cancelCloseEvent = false
     var keepAlive = false
 
