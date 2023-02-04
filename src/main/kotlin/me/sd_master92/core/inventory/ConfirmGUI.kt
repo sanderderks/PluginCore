@@ -5,36 +5,46 @@ import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.ItemStack
 
-abstract class ConfirmGUI(plugin: CustomPlugin, name: String, confirm: String = "Confirm", cancel: String = "Cancel") : GUI(plugin, name, 9)
+abstract class ConfirmGUI(plugin: CustomPlugin, name: String, confirm: String = "Confirm", cancel: String = "Cancel") : GUI(plugin, name, 9, back = false)
 {
     abstract fun onConfirm(event: InventoryClickEvent, player: Player)
     abstract fun onCancel(event: InventoryClickEvent, player: Player)
 
-    override fun onClick(event: InventoryClickEvent, player: Player, item: ItemStack)
+    init
     {
-        when (item.type)
-        {
-            Material.GREEN_WOOL ->
+        setItem(2, object : BaseItem(Material.GREEN_WOOL, ChatColor.GREEN.toString() + confirm) {
+            override fun onClick(event: InventoryClickEvent, player: Player)
             {
                 cancelCloseEvent = true
                 onConfirm(event, player)
             }
-            Material.RED_WOOL   ->
+        })
+        setItem(6, object : BaseItem(Material.RED_WOOL, ChatColor.RED.toString() + cancel)
+        {
+            override fun onClick(event: InventoryClickEvent, player: Player)
             {
                 cancelCloseEvent = true
                 onCancel(event, player)
             }
-            else                ->
-            {
-            }
-        }
+        })
     }
 
-    init
+    override fun onClick(event: InventoryClickEvent, player: Player)
     {
-        inventory.setItem(2, BaseItem(Material.GREEN_WOOL, ChatColor.GREEN.toString() + confirm))
-        inventory.setItem(6, BaseItem(Material.RED_WOOL, ChatColor.RED.toString() + cancel))
+    }
+
+    override fun onClose(event: InventoryCloseEvent, player: Player)
+    {
+    }
+
+    override fun onBack(event: InventoryClickEvent, player: Player)
+    {
+    }
+
+    override fun onSave(event: InventoryClickEvent, player: Player)
+    {
     }
 }

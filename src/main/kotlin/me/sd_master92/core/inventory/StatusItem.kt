@@ -5,7 +5,7 @@ import me.sd_master92.core.reverseWhenTrue
 import org.bukkit.ChatColor
 import org.bukkit.Material
 
-open class StatusItem(mat: Material, name: String, value: Boolean) : BaseItem(
+abstract class StatusItem(mat: Material, name: String, value: Boolean) : BaseItem(
     mat,
     ChatColor.LIGHT_PURPLE.toString() + name,
     ChatColor.GRAY.toString() + "Status: " + if (value) ChatColor.GREEN.toString() + "ON" else ChatColor.RED.toString() + "OFF"
