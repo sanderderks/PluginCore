@@ -13,26 +13,39 @@ abstract class BaseItem(mat: Material, name: String? = null, lore: String? = nul
 
     abstract fun onClick(event: InventoryClickEvent, player: Player)
 
-    init
+    fun setName(name: String)
     {
         val meta = itemMeta
-        if (meta != null)
+        meta?.setDisplayName(name)
+        itemMeta = meta
+    }
+
+    fun setLore(lore: String)
+    {
+        val meta = itemMeta
+        if(meta != null)
         {
-            if (name != null)
-            {
-                meta.setDisplayName(name)
-            }
-            if (lore != null)
-            {
-                meta.lore = null
-                meta.lore = listOf(*lore.split(";".toRegex()).toTypedArray())
-            }
-            if (enchanted)
-            {
-                meta.addEnchant(Enchantment.LUCK, 1, true)
-            }
-            meta.addItemFlags(*ItemFlag.values())
-            itemMeta = meta
+            meta.lore = null
+            meta.lore = listOf(*lore.split(";".toRegex()).toTypedArray())
         }
+        itemMeta = meta
+    }
+
+    fun setEnchanted()
+    {
+        val meta = itemMeta
+        meta?.addEnchant(Enchantment.LUCK, 1, true)
+        itemMeta = meta
+    }
+
+    init
+    {
+        name?.let { setName(name) }
+        lore?.let { setLore(lore) }
+        if(enchanted) { setEnchanted() }
+
+        val meta = itemMeta
+        meta?.addItemFlags(*ItemFlag.values())
+        itemMeta = meta
     }
 }
