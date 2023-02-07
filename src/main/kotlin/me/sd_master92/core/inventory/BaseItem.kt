@@ -31,6 +31,16 @@ abstract class BaseItem(mat: Material, name: String? = null, lore: String? = nul
         itemMeta = meta
     }
 
+    fun addLore(lore: String)
+    {
+        val meta = itemMeta
+        if(meta != null)
+        {
+            meta.lore?.addAll(listOf(*lore.split(";".toRegex()).toTypedArray()))
+        }
+        itemMeta = meta
+    }
+
     fun setEnchanted()
     {
         val meta = itemMeta
