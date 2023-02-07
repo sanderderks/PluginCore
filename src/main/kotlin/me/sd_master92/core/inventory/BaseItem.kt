@@ -36,7 +36,9 @@ abstract class BaseItem(mat: Material, name: String? = null, lore: String? = nul
         val meta = itemMeta
         if(meta != null)
         {
-            meta.lore?.addAll(listOf(*lore.split(";".toRegex()).toTypedArray()))
+            val newLore = if(meta.hasLore()) meta.lore!! else mutableListOf()
+            newLore.addAll(listOf(*lore.split(";".toRegex()).toTypedArray()))
+            meta.lore = newLore
         }
         itemMeta = meta
     }
