@@ -1,9 +1,10 @@
 package me.sd_master92.core
 
 import me.sd_master92.core.plugin.CustomPlugin
+import org.bukkit.Bukkit
 import org.bukkit.ChatColor
-import org.bukkit.plugin.java.JavaPlugin
 import java.sql.PreparedStatement
+import java.util.*
 
 fun String.appendWhenTrue(value: Boolean, append: String): String
 {
@@ -45,4 +46,9 @@ fun CustomPlugin.errorLog(message: String, e: Exception? = null)
 {
     server.consoleSender.sendMessage(ChatColor.YELLOW.toString() + "[$pluginName] " + ChatColor.RESET + message)
     e?.let { println(it.toString()) }
+}
+
+fun String.getUuidByName(): UUID?
+{
+    return Bukkit.getOfflinePlayers().find { it.name == this }?.uniqueId
 }

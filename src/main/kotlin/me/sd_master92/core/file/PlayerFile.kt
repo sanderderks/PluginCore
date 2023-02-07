@@ -1,5 +1,6 @@
 package me.sd_master92.core.file
 
+import me.sd_master92.core.getUuidByName
 import me.sd_master92.core.plugin.CustomPlugin
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -139,9 +140,17 @@ open class PlayerFile private constructor(var uuid: String, private val plugin: 
          * @param name   player name
          * @return PlayerFile or null
          */
-        fun getByName(name: String): PlayerFile?
+        fun getByName(plugin: CustomPlugin, name: String): PlayerFile?
         {
-            return ALL.values.firstOrNull { file -> file.name == name }
+            val file = ALL.values.firstOrNull { file -> file.name == name }
+            if(file != null)
+            {
+                return file
+            } else
+            {
+                name.getUuidByName()?.let { return getByUuid(plugin, it.toString()) }
+            }
+            return null
         }
 
         /**
