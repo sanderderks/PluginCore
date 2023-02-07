@@ -20,8 +20,8 @@ abstract class GUI @JvmOverloads constructor(
     val name: String,
     size: Int = 9,
     private val alwaysCancelEvent: Boolean = true,
-    back: Boolean = true,
-    save: Boolean = false
+    val back: Boolean = true,
+    val save: Boolean = false
 ) : Listener
 {
     private val inventory = Bukkit.createInventory(null, size, ChatColor.stripColor(name)!!)
@@ -91,9 +91,15 @@ abstract class GUI @JvmOverloads constructor(
         items[slot] = item
     }
 
-    fun addItem(item: ItemStack)
+    fun addItem(item: ItemStack, stack: Boolean = true)
     {
-        inventory.addItem(item)
+        if(stack)
+        {
+            inventory.addItem(item)
+        } else
+        {
+            inventory.setItem(inventory.firstEmpty(), item)
+        }
     }
 
     fun setItem(slot: Int, item: BaseItem)
@@ -105,11 +111,6 @@ abstract class GUI @JvmOverloads constructor(
     fun setItem(slot: Int, item: ItemStack)
     {
         inventory.setItem(slot, item)
-    }
-
-    fun setAll(items: Array<ItemStack>)
-    {
-        inventory.contents = items
     }
 
     fun clear()
