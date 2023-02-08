@@ -3,7 +3,6 @@ package me.sd_master92.core.inventory
 import me.sd_master92.core.plugin.CustomPlugin
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
-import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.HandlerList
@@ -24,7 +23,7 @@ abstract class GUI @JvmOverloads constructor(
 ) : Listener
 {
     private val inventory = Bukkit.createInventory(null, size, ChatColor.stripColor(name)!!)
-    val items = mutableMapOf<Int,BaseItem>()
+    val clickableItems = mutableMapOf<Int,BaseItem>()
     var cancelCloseEvent = false
     var keepAlive = false
 
@@ -48,7 +47,7 @@ abstract class GUI @JvmOverloads constructor(
             if(event.currentItem != null)
             {
                 onClick(event, event.whoClicked as Player)
-                items[event.slot]?.onClick(event, event.whoClicked as Player)
+                clickableItems[event.slot]?.onClick(event, event.whoClicked as Player)
             }
         }
     }
@@ -87,7 +86,7 @@ abstract class GUI @JvmOverloads constructor(
     {
         val slot = inventory.firstEmpty()
         inventory.setItem(slot, item)
-        items[slot] = item
+        clickableItems[slot] = item
     }
 
     fun addItem(item: ItemStack, stack: Boolean = true)
@@ -104,7 +103,7 @@ abstract class GUI @JvmOverloads constructor(
     fun setItem(slot: Int, item: BaseItem)
     {
         inventory.setItem(slot, item)
-        items[slot] = item
+        clickableItems[slot] = item
     }
 
     fun setItem(slot: Int, item: ItemStack)
@@ -115,7 +114,7 @@ abstract class GUI @JvmOverloads constructor(
     fun clear()
     {
         inventory.clear()
-        items.clear()
+        clickableItems.clear()
     }
 
     fun open(player: Player)
@@ -126,30 +125,19 @@ abstract class GUI @JvmOverloads constructor(
 
     private fun init(plugin: CustomPlugin)
     {
+        if(backPage != null)
+        {
+            setItem(inventory.size - if (save) 2 else 1, BackButton(this, backPage))
+        }
+        if(save)
+        {
+            setItem(inventory.size - 1, SaveButton(this, backPage))
+        }
         plugin.registerListener(this)
     }
 
     init
     {
-        if(backPage != null)
-        {
-            setItem(inventory.size - if (save) 2 else 1, object : BaseItem(Material.BARRIER, ChatColor.RED.toString() + "Back") {
-                override fun onClick(event: InventoryClickEvent, player: Player)
-                {
-                    onBack(event, player)
-                    backPage.open(player)
-                }
-            })
-        }
-        if(save)
-        {
-            setItem(inventory.size - 1, object : BaseItem(Material.WRITABLE_BOOK, ChatColor.GREEN.toString() + "Save") {
-                override fun onClick(event: InventoryClickEvent, player: Player)
-                {
-                    onSave(event, player)
-                }
-            })
-        }
         init(plugin)
     }
 }
