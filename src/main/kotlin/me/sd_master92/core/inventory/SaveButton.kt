@@ -8,7 +8,15 @@ import org.bukkit.event.inventory.InventoryClickEvent
 class SaveButton(private val currentPage: GUI, private val backPage: GUI? = null) : BaseItem(Material.WRITABLE_BOOK, ChatColor.GREEN.toString() + "Save") {
     override fun onClick(event: InventoryClickEvent, player: Player)
     {
+        event.isCancelled = true
+        currentPage.cancelCloseEvent = true
         currentPage.onSave(event, player)
-        backPage?.open(player)
+        if(backPage != null)
+        {
+            backPage.open(player)
+        } else
+        {
+            player.closeInventory()
+        }
     }
 }

@@ -30,9 +30,27 @@ abstract class GUI @JvmOverloads constructor(
     val size get() = inventory.size
     val contents get() = inventory.contents
 
+    /**
+     * Called when any non-null item is clicked
+     */
     abstract fun onClick(event: InventoryClickEvent, player: Player)
+
+    /**
+     * Called when this inventory is closed
+     */
     abstract fun onClose(event: InventoryCloseEvent, player: Player)
+
+    /**
+     * Click and close event are always cancelled
+     * and the previous page is automatically opened if available
+     * Else this inventory is force closed
+     */
     abstract fun onBack(event: InventoryClickEvent, player: Player)
+    /**
+     * Click and close event are always cancelled
+     * and the previous page is automatically opened if available
+     * Else this inventory is force closed
+     */
     abstract fun onSave(event: InventoryClickEvent, player: Player)
 
     @EventHandler
