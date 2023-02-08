@@ -6,9 +6,9 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
-import org.bukkit.inventory.ItemStack
 
-abstract class ConfirmGUI(plugin: CustomPlugin, name: String, confirm: String = "Confirm", cancel: String = "Cancel") : GUI(plugin, name, 9, back = false)
+abstract class ConfirmGUI(plugin: CustomPlugin, name: String, confirm: String = "Confirm", cancel: String = "Cancel") :
+    GUI(plugin, null, name, 9)
 {
     abstract fun onConfirm(event: InventoryClickEvent, player: Player)
     abstract fun onCancel(event: InventoryClickEvent, player: Player)

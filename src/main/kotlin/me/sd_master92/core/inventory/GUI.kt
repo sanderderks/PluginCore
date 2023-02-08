@@ -4,7 +4,6 @@ import me.sd_master92.core.plugin.CustomPlugin
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Material
-import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.HandlerList
@@ -17,10 +16,10 @@ import org.bukkit.inventory.ItemStack
 
 abstract class GUI @JvmOverloads constructor(
     plugin: CustomPlugin,
+    val backPage: GUI?,
     val name: String,
     size: Int = 9,
     private val alwaysCancelEvent: Boolean = true,
-    val back: Boolean = true,
     val save: Boolean = false
 ) : Listener
 {
@@ -121,6 +120,7 @@ abstract class GUI @JvmOverloads constructor(
 
     fun open(player: Player)
     {
+        cancelCloseEvent = false
         player.openInventory(inventory)
     }
 
@@ -131,12 +131,13 @@ abstract class GUI @JvmOverloads constructor(
 
     init
     {
-        if (back)
+        if(backPage != null)
         {
             setItem(inventory.size - if (save) 2 else 1, object : BaseItem(Material.BARRIER, ChatColor.RED.toString() + "Back") {
                 override fun onClick(event: InventoryClickEvent, player: Player)
                 {
                     onBack(event, player)
+                    backPage.open(player)
                 }
             })
         }
