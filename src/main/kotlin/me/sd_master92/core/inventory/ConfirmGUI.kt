@@ -13,6 +13,27 @@ abstract class ConfirmGUI(plugin: CustomPlugin, name: String, confirm: String = 
     abstract fun onConfirm(event: InventoryClickEvent, player: Player)
     abstract fun onCancel(event: InventoryClickEvent, player: Player)
 
+    override fun newInstance(): GUI
+    {
+        return this
+    }
+
+    override fun onClick(event: InventoryClickEvent, player: Player)
+    {
+    }
+
+    override fun onClose(event: InventoryCloseEvent, player: Player)
+    {
+    }
+
+    override fun onBack(event: InventoryClickEvent, player: Player)
+    {
+    }
+
+    override fun onSave(event: InventoryClickEvent, player: Player)
+    {
+    }
+
     init
     {
         setItem(2, object : BaseItem(Material.GREEN_WOOL, ChatColor.GREEN.toString() + confirm) {
@@ -30,21 +51,5 @@ abstract class ConfirmGUI(plugin: CustomPlugin, name: String, confirm: String = 
                 onCancel(event, player)
             }
         })
-    }
-
-    override fun onClick(event: InventoryClickEvent, player: Player)
-    {
-    }
-
-    override fun onClose(event: InventoryCloseEvent, player: Player)
-    {
-    }
-
-    override fun onBack(event: InventoryClickEvent, player: Player)
-    {
-    }
-
-    override fun onSave(event: InventoryClickEvent, player: Player)
-    {
     }
 }

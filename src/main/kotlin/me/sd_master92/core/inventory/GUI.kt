@@ -15,7 +15,7 @@ import org.bukkit.inventory.ItemStack
 
 abstract class GUI @JvmOverloads constructor(
     plugin: CustomPlugin,
-    var backPage: GUI?,
+    val backPage: GUI?,
     val name: String,
     size: Int = 9,
     private val alwaysCancelEvent: Boolean = true,
@@ -29,6 +29,8 @@ abstract class GUI @JvmOverloads constructor(
 
     val size get() = inventory.size
     val contents get() = inventory.contents
+
+    abstract fun newInstance(): GUI
 
     /**
      * Called when any non-null item is clicked
@@ -139,12 +141,6 @@ abstract class GUI @JvmOverloads constructor(
     {
         cancelCloseEvent = false
         player.openInventory(inventory)
-    }
-
-    fun refresh(player: Player, newInstance: GUI)
-    {
-        newInstance.backPage = backPage?.backPage
-        newInstance.open(player)
     }
 
     private fun init(plugin: CustomPlugin)
