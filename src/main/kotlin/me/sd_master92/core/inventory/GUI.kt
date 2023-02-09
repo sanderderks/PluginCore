@@ -143,7 +143,7 @@ abstract class GUI @JvmOverloads constructor(
 
     fun refresh(player: Player, newInstance: GUI)
     {
-        newInstance.backPage = backPage
+        newInstance.backPage = backPage?.backPage
         newInstance.open(player)
     }
 
