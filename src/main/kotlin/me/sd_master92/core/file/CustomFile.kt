@@ -309,6 +309,34 @@ open class CustomFile(folder: File, name: String, plugin: CustomPlugin) : YamlCo
         return messages
     }
 
+    fun keyMigrations(migrations: Map<String, String>)
+    {
+        for (migration in migrations)
+        {
+            if (!contains(migration.key) && contains(migration.key))
+            {
+                set(migration.value, get(migration.key))
+                delete(migration.key)
+            }
+        }
+    }
+
+    fun valueMigrations(migrations: Map<String, String>)
+    {
+        for (key in getKeys(true))
+        {
+            val value = getString(key)
+            for (migration in migrations)
+            {
+                if (value?.contains(migration.key) == true)
+                {
+                    set(key, value.replace(migration.key, migration.value))
+                }
+            }
+        }
+        saveConfig()
+    }
+
     init
     {
         try
