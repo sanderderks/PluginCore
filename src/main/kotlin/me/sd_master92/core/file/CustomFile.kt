@@ -313,7 +313,7 @@ open class CustomFile(folder: File, name: String, plugin: CustomPlugin) : YamlCo
     {
         for (migration in migrations)
         {
-            if (!contains(migration.key) && contains(migration.key))
+            if (!contains(migration.value) && contains(migration.key))
             {
                 set(migration.value, get(migration.key))
                 delete(migration.key)
