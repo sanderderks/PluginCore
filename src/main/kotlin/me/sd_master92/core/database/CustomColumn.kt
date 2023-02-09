@@ -2,7 +2,7 @@ package me.sd_master92.core.database
 
 import me.sd_master92.core.setValue
 
-class CustomColumn(val database: CustomDatabase, val table: CustomTable, val name: String)
+class CustomColumn(val database: CustomDatabase, val table: CustomTable, var name: String)
 {
     fun exists(): Boolean
     {
@@ -30,18 +30,28 @@ class CustomColumn(val database: CustomDatabase, val table: CustomTable, val nam
         } else true
     }
 
-    fun delete(): Boolean
+    fun renameOrCreate(newName: String, dataType: DataType): Boolean
     {
-        val statement = database.connection!!.prepareStatement("ALTER TABLE ${table.name} DROP COLUMN $name")
-        return database.execute(statement)
+        val statement = database.connection!!.prepareStatement("ALTER TABLE ${table.name} CHANGE $name $newName ${dataType.value}")
+        return if(database.execute(statement))
+        {
+            name = newName
+            true
+        } else
+        {
+            createIFNotExists(dataType)
+        }
     }
 
-    fun insertData(value: Any): Boolean
+    fun delete(): Boolean
     {
-        val statement = database.connection!!.prepareStatement("INSERT INTO ${table.name} (?) VALUES (?)")
-        statement.setString(1, name)
-        statement.setValue(2, value)
-        return database.execute(statement)
+        return if(exists())
+        {
+            val statement = database.connection!!.prepareStatement("ALTER TABLE ${table.name} DROP COLUMN $name")
+            database.execute(statement)
+        } else {
+            true
+        }
     }
 
     enum class DataType(val value: String)
