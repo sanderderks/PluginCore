@@ -141,6 +141,12 @@ abstract class GUI @JvmOverloads constructor(
         player.openInventory(inventory)
     }
 
+    fun refresh(player: Player, newInstance: GUI)
+    {
+        newInstance.backPage = backPage
+        newInstance.open(player)
+    }
+
     private fun init(plugin: CustomPlugin)
     {
         if(backPage != null)
