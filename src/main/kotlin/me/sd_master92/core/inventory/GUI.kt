@@ -147,11 +147,11 @@ abstract class GUI @JvmOverloads constructor(
     {
         if(backPage != null)
         {
-            setItem(inventory.size - if (save) 2 else 1, BackButton(this, backPage))
+            setItem(inventory.size - if (save) 2 else 1, BackButton(this))
         }
         if(save)
         {
-            setItem(inventory.size - 1, SaveButton(this, backPage))
+            setItem(inventory.size - 1, SaveButton(this))
         }
         plugin.registerListener(this)
     }
