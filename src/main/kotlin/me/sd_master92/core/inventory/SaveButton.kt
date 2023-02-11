@@ -1,11 +1,11 @@
 package me.sd_master92.core.inventory
 
-import org.bukkit.ChatColor
+import me.sd_master92.core.plugin.CustomPlugin
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 
-class SaveButton(private val currentPage: GUI) : BaseItem(Material.WRITABLE_BOOK, ChatColor.GREEN.toString() + "Save") {
+class SaveButton(private val currentPage: GUI) : BaseItem(Material.WRITABLE_BOOK, CustomPlugin.SAVE_TEXT) {
     override fun onClick(event: InventoryClickEvent, player: Player)
     {
         event.isCancelled = true

@@ -134,4 +134,13 @@ abstract class CustomPlugin @JvmOverloads constructor(
             }
             return field;
         }
+
+    companion object
+    {
+        var SAVE_TEXT = ChatColor.GREEN.toString() + "Save"
+        var BACK_TEXT = ChatColor.RED.toString() + "Back"
+        var STATUS_TEXT = ChatColor.GRAY.toString() + "Status:"
+        var ON_TEXT = ChatColor.GREEN.toString() + "ON"
+        var OFF_TEXT = ChatColor.RED.toString() + "OFF"
+    }
 }
