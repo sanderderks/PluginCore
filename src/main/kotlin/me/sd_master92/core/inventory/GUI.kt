@@ -15,7 +15,7 @@ import org.bukkit.inventory.ItemStack
 
 abstract class GUI @JvmOverloads constructor(
     plugin: CustomPlugin,
-    val backPage: GUI?,
+    var backPage: GUI?,
     val name: String,
     size: Int = 9,
     private val alwaysCancelEvent: Boolean = true,
