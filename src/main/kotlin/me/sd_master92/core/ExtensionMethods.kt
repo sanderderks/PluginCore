@@ -45,7 +45,7 @@ fun CustomPlugin.infoLog(message: String)
 fun CustomPlugin.errorLog(message: String, e: Exception? = null)
 {
     server.consoleSender.sendMessage(ChatColor.YELLOW.toString() + "[$pluginName] " + ChatColor.RESET + message)
-    e?.let { println(it.toString()) }
+    e?.printStackTrace()
 }
 
 fun String.getUuidByName(): UUID?
