@@ -1,7 +1,5 @@
 package me.sd_master92.core.database
 
-import me.sd_master92.core.setValue
-
 class CustomColumn(val database: CustomDatabase, val table: CustomTable, var name: String)
 {
     fun exists(): Boolean
