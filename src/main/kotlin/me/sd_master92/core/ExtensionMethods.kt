@@ -3,6 +3,8 @@ package me.sd_master92.core
 import me.sd_master92.core.plugin.CustomPlugin
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
+import org.bukkit.Material
+import org.bukkit.inventory.ItemStack
 import java.sql.PreparedStatement
 import java.util.*
 
@@ -22,6 +24,11 @@ fun Boolean.reverseWhenTrue(value: Boolean): Boolean
         return !this
     }
     return this
+}
+
+fun Array<ItemStack?>.withAir(): Array<ItemStack?>
+{
+    return this.map { it ?: ItemStack(Material.AIR) }.toTypedArray()
 }
 
 fun PreparedStatement.setValue(i: Int, value: Any): PreparedStatement
