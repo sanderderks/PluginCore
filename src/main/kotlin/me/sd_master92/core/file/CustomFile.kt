@@ -3,7 +3,6 @@ package me.sd_master92.core.file
 import me.sd_master92.core.plugin.CustomPlugin
 import org.bukkit.ChatColor
 import org.bukkit.Location
-import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.inventory.ItemStack
 import java.io.File
@@ -217,6 +216,20 @@ open class CustomFile(folder: File, name: String, plugin: CustomPlugin) : YamlCo
     }
 
     /**
+     * get items
+     *
+     * @param path config path
+     * @param start start index
+     * @param end end index
+     * @return empty or filled array of items
+     */
+    fun getItemsWithPagination(path: String, page: Int, size: Int): Array<ItemStack>
+    {
+        val start = page * size
+        return getItems(path).filterIndexed { i, _ -> i in start until (start + size) }.toTypedArray()
+    }
+
+    /**
      * save items
      *
      * @param path  config path
@@ -230,16 +243,23 @@ open class CustomFile(folder: File, name: String, plugin: CustomPlugin) : YamlCo
     }
 
     /**
-     * save items with air instead of null
+     * save items with pagination
      *
      * @param path  config path
      * @param items items to save
+     * @param start start index
+     * @param end end index
      * @return successful or not
      */
-    fun setItemsWithNull(path: String, items: Array<ItemStack?>): Boolean
+    fun setItemsWithPagination(path: String, items: Array<ItemStack?>, page: Int, size: Int): Boolean
     {
-        return setItems(path, items.map { item: ItemStack? -> item ?: ItemStack(Material.AIR) }.toTypedArray())
+        val start = page * size
+        val originalItems = getItems(path).filterIndexed { i, _ -> i !in start until (start + size) }.toMutableList()
+        originalItems.addAll(items.filterNotNull())
+        set("items.${path.lowercase()}", originalItems.toTypedArray())
+        return saveConfig()
     }
+
 
     /**
      * delete items
