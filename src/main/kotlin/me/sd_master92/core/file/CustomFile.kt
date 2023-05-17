@@ -219,8 +219,6 @@ open class CustomFile(folder: File, name: String, plugin: CustomPlugin) : YamlCo
      * get items
      *
      * @param path config path
-     * @param start start index
-     * @param end end index
      * @return empty or filled array of items
      */
     fun getItemsWithPagination(path: String, page: Int, size: Int): Array<ItemStack>
@@ -247,17 +245,22 @@ open class CustomFile(folder: File, name: String, plugin: CustomPlugin) : YamlCo
      *
      * @param path  config path
      * @param items items to save
-     * @param start start index
-     * @param end end index
      * @return successful or not
      */
     fun setItemsWithPagination(path: String, items: Array<ItemStack?>, page: Int, size: Int): Boolean
     {
-        val start = page * size
-        val originalItems = getItems(path).filterIndexed { i, _ -> i !in start until (start + size) }.toMutableList()
-        originalItems.addAll(items.filterNotNull())
-        set("items.${path.lowercase()}", originalItems.toTypedArray())
-        return saveConfig()
+        val originalItems = getItems(path).toMutableList()
+        if (originalItems.size <= page * size)
+        {
+            originalItems.addAll(items.filterNotNull())
+        } else
+        {
+            val start = page * size
+            val end = minOf(start + size, originalItems.size)
+            originalItems.subList(start, end).clear()
+            originalItems.addAll(start, items.filterNotNull())
+        }
+        return setItems(path, originalItems.toTypedArray())
     }
 
 

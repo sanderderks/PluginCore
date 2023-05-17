@@ -23,12 +23,15 @@ abstract class GUI @JvmOverloads constructor(
 ) : Listener
 {
     private val inventory = Bukkit.createInventory(null, size, ChatColor.stripColor(name)!!)
-    val clickableItems = mutableMapOf<Int,BaseItem>()
+    val clickableItems = mutableMapOf<Int, BaseItem>()
     var cancelCloseEvent = false
     var keepAlive = false
 
+    val contents: Array<ItemStack?> get() = inventory.contents
     val size get() = inventory.size
-    val contents get() = inventory.contents
+
+    val nonClickableSize get() = contents.filterNotNull().size - clickableItems.size
+    val nonClickableSizeWithNull get() = contents.size - clickableItems.size
 
     abstract fun newInstance(): GUI
 
@@ -48,6 +51,7 @@ abstract class GUI @JvmOverloads constructor(
      * Else this inventory is force closed
      */
     abstract fun onBack(event: InventoryClickEvent, player: Player)
+
     /**
      * Click and close event are always cancelled
      * and the previous page is automatically opened if available
@@ -64,7 +68,7 @@ abstract class GUI @JvmOverloads constructor(
             {
                 event.isCancelled = true
             }
-            if(event.currentItem != null)
+            if (event.currentItem != null)
             {
                 onClick(event, event.whoClicked as Player)
                 clickableItems[event.slot]?.onClick(event, event.whoClicked as Player)
@@ -77,7 +81,7 @@ abstract class GUI @JvmOverloads constructor(
     {
         if (isThisInventory(event) && !cancelCloseEvent)
         {
-            if(!keepAlive)
+            if (!keepAlive)
             {
                 HandlerList.unregisterAll(this)
             }
@@ -111,7 +115,7 @@ abstract class GUI @JvmOverloads constructor(
 
     fun addItem(item: ItemStack, stack: Boolean = true)
     {
-        if(stack)
+        if (stack)
         {
             inventory.addItem(item)
         } else
@@ -145,11 +149,11 @@ abstract class GUI @JvmOverloads constructor(
 
     private fun init(plugin: CustomPlugin)
     {
-        if(backPage != null)
+        if (backPage != null)
         {
             setItem(inventory.size - if (save) 2 else 1, BackButton(this))
         }
-        if(save)
+        if (save)
         {
             setItem(inventory.size - 1, SaveButton(this))
         }
