@@ -16,7 +16,8 @@ class CustomColumn(val database: CustomDatabase, val table: CustomTable, var nam
 
     fun create(dataType: DataType): Boolean
     {
-        val statement = database.connection!!.prepareStatement("ALTER TABLE ${table.name} ADD COLUMN $name ${dataType.value}")
+        val statement =
+            database.connection!!.prepareStatement("ALTER TABLE ${table.name} ADD COLUMN $name ${dataType.value}")
         return database.execute(statement)
     }
 
@@ -30,8 +31,9 @@ class CustomColumn(val database: CustomDatabase, val table: CustomTable, var nam
 
     fun renameOrCreate(newName: String, dataType: DataType): Boolean
     {
-        val statement = database.connection!!.prepareStatement("ALTER TABLE ${table.name} CHANGE $name $newName ${dataType.value}")
-        return if(database.execute(statement))
+        val statement =
+            database.connection!!.prepareStatement("ALTER TABLE ${table.name} CHANGE $name $newName ${dataType.value}")
+        return if (database.execute(statement))
         {
             name = newName
             true
@@ -43,11 +45,12 @@ class CustomColumn(val database: CustomDatabase, val table: CustomTable, var nam
 
     fun delete(): Boolean
     {
-        return if(exists())
+        return if (exists())
         {
             val statement = database.connection!!.prepareStatement("ALTER TABLE ${table.name} DROP COLUMN $name")
             database.execute(statement)
-        } else {
+        } else
+        {
             true
         }
     }
@@ -55,7 +58,7 @@ class CustomColumn(val database: CustomDatabase, val table: CustomTable, var nam
     enum class DataType(val value: String)
     {
         INT_PRIMARY("int PRIMARY KEY AUTO_INCREMENT"),
-        VARCHAR_PRIMARY("varchar(255) PRIMARY KEY"),
+        VARCHAR_PRIMARY("varchar(100) PRIMARY KEY"),
         INT("int"),
         BOOLEAN("bool"),
         LONG("bigint"),
