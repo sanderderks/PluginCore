@@ -72,7 +72,7 @@ abstract class CustomPlugin @JvmOverloads constructor(
         infoLog("")
         infoLog("| checking for updates")
         infoLog("|")
-        if (isUpToDate())
+        if (versionStatus().isValid())
         {
             infoLog("|___up to date!")
         } else
@@ -88,7 +88,19 @@ abstract class CustomPlugin @JvmOverloads constructor(
         server.pluginManager.registerEvents(listener, this)
     }
 
-    fun isUpToDate(): Boolean
+    enum class VersionStatus
+    {
+        OUTDATED,
+        LATEST,
+        BETA;
+
+        fun isValid(): Boolean
+        {
+            return this == LATEST || this == BETA
+        }
+    }
+
+    fun versionStatus(): VersionStatus
     {
         try
         {
@@ -98,17 +110,17 @@ abstract class CustomPlugin @JvmOverloads constructor(
                 val latestSubVersion = latestSubVersions[i]
                 if (subVersion > latestSubVersion)
                 {
-                    return true
-                } else if(subVersion < latestSubVersion)
+                    return VersionStatus.BETA
+                } else if (subVersion < latestSubVersion)
                 {
-                    return false
+                    return VersionStatus.OUTDATED
                 }
             }
         } catch (_: Exception)
         {
-            return false
+            return VersionStatus.OUTDATED
         }
-        return true
+        return VersionStatus.LATEST
     }
 
     var latestVersion: String = "1.0"
