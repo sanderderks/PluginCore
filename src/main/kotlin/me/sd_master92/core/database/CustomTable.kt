@@ -61,7 +61,8 @@ class CustomTable(
         }
         placeholders.deleteCharAt(placeholders.length - 1)
 
-        val statement = database.connection!!.prepareStatement("INSERT INTO $name ($columnsAsString) VALUES ($placeholders)")
+        val statement =
+            database.connection!!.prepareStatement("INSERT INTO $name ($columnsAsString) VALUES ($placeholders)")
         statement.setString(1, columnsAsString.toString())
         var i = 1
         for (value in values)
@@ -72,7 +73,7 @@ class CustomTable(
         return database.execute(statement)
     }
 
-    fun updateData(whereColumn: String, whereValue: Any, updateColumn: String, updateValue: Any): Boolean
+    fun updateData(whereColumn: String, whereValue: Any, updateColumn: String, updateValue: Any?): Boolean
     {
         val statement =
             database.connection!!.prepareStatement("UPDATE $name SET $updateColumn=? WHERE $whereColumn=?")

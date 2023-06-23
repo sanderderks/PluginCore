@@ -6,6 +6,7 @@ import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import java.sql.PreparedStatement
+import java.sql.Types
 import java.util.*
 
 fun String.appendWhenTrue(value: Boolean, append: String): String
@@ -31,15 +32,21 @@ fun Array<ItemStack?>.withAir(): Array<ItemStack?>
     return this.map { it ?: ItemStack(Material.AIR) }.toTypedArray()
 }
 
-fun PreparedStatement.setValue(i: Int, value: Any): PreparedStatement
+fun PreparedStatement.setValue(i: Int, value: Any?): PreparedStatement
 {
-    when (value)
+    if (value == null)
     {
-        is String -> this.setString(i, value)
-        is Int    -> this.setInt(i, value)
-        is Double -> this.setDouble(i, value)
-        is Long   -> this.setLong(i, value)
-        else      -> this.setString(i, value.toString())
+        this.setNull(i, Types.NULL)
+    } else
+    {
+        when (value)
+        {
+            is String -> this.setString(i, value)
+            is Int    -> this.setInt(i, value)
+            is Double -> this.setDouble(i, value)
+            is Long   -> this.setLong(i, value)
+            else      -> this.setString(i, value.toString())
+        }
     }
     return this
 }
