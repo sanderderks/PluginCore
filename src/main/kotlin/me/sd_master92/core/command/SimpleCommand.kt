@@ -4,13 +4,15 @@ import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
+import org.bukkit.command.TabCompleter
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
+
 
 abstract class SimpleCommand @JvmOverloads constructor(
     private val plugin: JavaPlugin, private val name: String, private val allowZeroArgs: Boolean = true,
     vararg subCommands: SimpleSubCommand
-) : CommandExecutor
+) : CommandExecutor, TabCompleter
 {
     private var subCommands: Map<String, SimpleSubCommand>
     private var mustBePlayer = false
@@ -44,6 +46,27 @@ abstract class SimpleCommand @JvmOverloads constructor(
             }
         }
         return true
+    }
+
+    override fun onTabComplete(
+        sender: CommandSender,
+        cmd: Command,
+        p2: String,
+        args: Array<String>
+    ): MutableList<String>?
+    {
+        if (cmd.name == name)
+        {
+            return this.subCommands.values
+                    .filter { subCommand ->
+                        subCommand.permission?.let { sender.hasPermission(it) } ?: true
+                    }
+                    .filter { subCommand -> !subCommand.mustBePlayer() || sender is Player }
+                    .map { subCommand -> subCommand.name }
+                    .toMutableList()
+                    .ifEmpty { null }
+        }
+        return null
     }
 
     fun withUsage(usage: String): SimpleCommand
