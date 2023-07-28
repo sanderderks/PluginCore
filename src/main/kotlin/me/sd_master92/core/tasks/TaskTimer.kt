@@ -20,7 +20,7 @@ class TaskTimer private constructor(
     {
         if (time < 0)
         {
-            object : BukkitRunnable()
+            bukkitTask = object : BukkitRunnable()
             {
                 override fun run()
                 {
@@ -65,7 +65,13 @@ class TaskTimer private constructor(
             return TaskTimer(plugin, delay, task = task)
         }
 
-        fun repeat(plugin: Plugin, time: Long = 1, delay: Long = 0, count: Int = -1, task: (TaskTimer) -> Unit): TaskTimer
+        fun repeat(
+            plugin: Plugin,
+            time: Long = 1,
+            delay: Long = 0,
+            count: Int = -1,
+            task: (TaskTimer) -> Unit
+        ): TaskTimer
         {
             return TaskTimer(plugin, delay, time, count, task)
         }
