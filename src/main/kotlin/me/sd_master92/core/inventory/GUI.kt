@@ -60,7 +60,7 @@ abstract class GUI @JvmOverloads constructor(
     abstract fun onSave(event: InventoryClickEvent, player: Player)
 
     @EventHandler
-    fun onInventoryClick(event: InventoryClickEvent)
+    open fun onInventoryClick(event: InventoryClickEvent)
     {
         if (isThisInventory(event))
         {
@@ -77,7 +77,7 @@ abstract class GUI @JvmOverloads constructor(
     }
 
     @EventHandler
-    fun onInventoryClose(event: InventoryCloseEvent)
+    open fun onInventoryClose(event: InventoryCloseEvent)
     {
         if (isThisInventory(event) && !cancelCloseEvent)
         {
@@ -90,7 +90,7 @@ abstract class GUI @JvmOverloads constructor(
     }
 
     @EventHandler
-    fun onDrag(event: InventoryDragEvent)
+    open fun onDrag(event: InventoryDragEvent)
     {
         if (isThisInventory(event) && alwaysCancelEvent)
         {
