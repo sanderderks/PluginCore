@@ -73,6 +73,9 @@ abstract class GUI @JvmOverloads constructor(
                 onClick(event, event.whoClicked as Player)
                 clickableItems[event.slot]?.onClick(event, event.whoClicked as Player)
             }
+        } else if (event.view.title == name && event.isShiftClick && alwaysCancelEvent)
+        {
+            event.isCancelled = true
         }
     }
 
