@@ -61,11 +61,11 @@ abstract class PlayerStringInput(
 
     private fun processInput(input: String)
     {
-        if (allowCancel && input == "cancel")
+        if (allowCancel && input in listOf("cancel", "skip"))
         {
             cancel()
             onCancel()
-        } else if(input.isNotEmpty())
+        } else if (input.isNotEmpty())
         {
             onInputReceived(input)
         }
