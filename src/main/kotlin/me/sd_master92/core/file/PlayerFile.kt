@@ -7,6 +7,7 @@ import org.bukkit.entity.Player
 import java.io.File
 import java.util.*
 import java.util.stream.Collectors
+import kotlin.collections.HashMap
 
 /**
  * create a new PlayerFile instance
@@ -14,7 +15,7 @@ import java.util.stream.Collectors
  * @param uuid   uuid of this player
  * @param plugin main plugin class
  */
-open class PlayerFile private constructor(var uuid: String, private val plugin: CustomPlugin) :
+open class PlayerFile private constructor(val uuid: UUID, private val plugin: CustomPlugin) :
     CustomFile(File(plugin.dataFolder.toString() + File.separator + "players"), "$uuid.yml", plugin)
 {
     /**
@@ -24,7 +25,7 @@ open class PlayerFile private constructor(var uuid: String, private val plugin: 
      * @param player the player
      * @param plugin main plugin class
      */
-    private constructor(player: Player, plugin: CustomPlugin) : this(player.uniqueId.toString(), plugin)
+    private constructor(player: Player, plugin: CustomPlugin) : this(player.uniqueId, plugin)
     {
         name = player.name
     }
@@ -86,15 +87,21 @@ open class PlayerFile private constructor(var uuid: String, private val plugin: 
 
     companion object
     {
-        private var ALL: MutableMap<String, PlayerFile> = HashMap()
+        private var ALL: MutableMap<UUID, PlayerFile> = HashMap()
 
         fun init(plugin: CustomPlugin)
         {
             val files = File(plugin.dataFolder.toString() + File.separator + "players").listFiles()
             ALL = if (files != null)
             {
-                Arrays.stream(files).map { file: File -> PlayerFile(file.name.replace(".yml", ""), plugin) }
-                    .collect(Collectors.toList()).associateBy { file -> file.uuid }.toMutableMap()
+                try
+                {
+                    Arrays.stream(files).map { file: File -> PlayerFile(UUID.fromString(file.name.replace(".yml", "")), plugin) }
+                            .collect(Collectors.toList()).associateBy { file -> file.uuid }.toMutableMap()
+                } catch (e: Exception)
+                {
+                    HashMap()
+                }
             } else HashMap()
         }
 
@@ -105,7 +112,7 @@ open class PlayerFile private constructor(var uuid: String, private val plugin: 
          * @param plugin main plugin class
          * @return PlayerFile or null
          */
-        fun getByUuid(plugin: CustomPlugin, uuid: String): PlayerFile
+        fun getByUuid(plugin: CustomPlugin, uuid: UUID): PlayerFile
         {
             return ALL.getOrDefault(uuid, PlayerFile(uuid, plugin))
         }
@@ -119,7 +126,7 @@ open class PlayerFile private constructor(var uuid: String, private val plugin: 
          */
         fun getByUuid(plugin: CustomPlugin, player: Player): PlayerFile
         {
-            return ALL.getOrDefault(player.uniqueId.toString(), PlayerFile(player, plugin))
+            return ALL.getOrDefault(player.uniqueId, PlayerFile(player, plugin))
         }
 
         /**
@@ -148,7 +155,7 @@ open class PlayerFile private constructor(var uuid: String, private val plugin: 
                 return file
             } else
             {
-                name.getUuidByName()?.let { return getByUuid(plugin, it.toString()) }
+                name.getUuidByName()?.let { return getByUuid(plugin, it) }
             }
             return null
         }
@@ -158,7 +165,7 @@ open class PlayerFile private constructor(var uuid: String, private val plugin: 
          *
          * @return empty or filled list of PlayerFiles
          */
-        fun getAll(): Map<String, PlayerFile>
+        fun getAll(): Map<UUID, PlayerFile>
         {
             return ALL
         }
