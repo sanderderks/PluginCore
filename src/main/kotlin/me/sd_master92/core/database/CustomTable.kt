@@ -2,7 +2,6 @@ package me.sd_master92.core.database
 
 import me.sd_master92.core.database.CustomColumn.DataType
 import me.sd_master92.core.setValue
-import sun.jvm.hotspot.oops.CellTypeState.value
 import java.sql.ResultSet
 
 class CustomTable(
