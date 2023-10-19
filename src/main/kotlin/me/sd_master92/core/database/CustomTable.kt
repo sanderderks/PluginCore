@@ -2,6 +2,7 @@ package me.sd_master92.core.database
 
 import me.sd_master92.core.database.CustomColumn.DataType
 import me.sd_master92.core.setValue
+import sun.jvm.hotspot.oops.CellTypeState.value
 import java.sql.ResultSet
 
 class CustomTable(
@@ -63,7 +64,6 @@ class CustomTable(
 
         val statement =
             database.connection!!.prepareStatement("INSERT INTO $name ($columnsAsString) VALUES ($placeholders)")
-        statement.setString(1, columnsAsString.toString())
         var i = 1
         for (value in values)
         {
@@ -75,24 +75,23 @@ class CustomTable(
 
     fun updateData(whereColumn: String, whereValue: Any, updateColumn: String, updateValue: Any?): Boolean
     {
-        val statement =
-            database.connection!!.prepareStatement("UPDATE $name SET $updateColumn=? WHERE $whereColumn=?")
+        val statement = database.connection!!.prepareStatement("UPDATE $name SET $updateColumn=? WHERE $whereColumn=?")
         statement.setValue(1, updateValue)
         statement.setValue(2, whereValue)
         return database.execute(statement)
     }
 
-    fun getData(column: String, value: Any): ResultSet
+    fun getData(column: String, value: Any): ResultSet?
     {
         val statement = database.connection!!.prepareStatement("SELECT * FROM $name WHERE $column=?")
         statement.setValue(1, value)
-        return database.query(statement)!!
+        return database.query(statement)
     }
 
-    fun getAll(): ResultSet
+    fun getAll(): ResultSet?
     {
         val statement = database.connection!!.prepareStatement("SELECT * FROM $name")
-        return database.query(statement)!!
+        return database.query(statement)
     }
 
     fun deleteData(column: String, value: Any): Boolean

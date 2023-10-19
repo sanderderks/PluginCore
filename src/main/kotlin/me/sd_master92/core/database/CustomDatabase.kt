@@ -84,6 +84,9 @@ class CustomDatabase
             print(statement)
             error(e)
             false
+        } finally
+        {
+            statement.close()
         }
     }
 
@@ -97,6 +100,9 @@ class CustomDatabase
             print(statement)
             error(e)
             null
+        } finally
+        {
+            statement.close()
         }
     }
 
