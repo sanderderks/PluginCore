@@ -4,6 +4,7 @@ import me.sd_master92.core.plugin.CustomPlugin
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Material
+import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import java.sql.PreparedStatement
 import java.sql.Types
@@ -65,4 +66,16 @@ fun CustomPlugin.errorLog(message: String, e: Exception? = null)
 fun String.getUuidByName(): UUID?
 {
     return Bukkit.getOfflinePlayers().find { it.name == this }?.uniqueId
+}
+
+fun Inventory.lastEmpty(): Int?
+{
+    for (i in size - 1 downTo 0)
+    {
+        if (getItem(i) == null)
+        {
+            return i
+        }
+    }
+    return null
 }

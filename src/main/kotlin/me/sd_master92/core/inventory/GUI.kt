@@ -1,5 +1,6 @@
 package me.sd_master92.core.inventory
 
+import me.sd_master92.core.lastEmpty
 import me.sd_master92.core.plugin.CustomPlugin
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -109,21 +110,28 @@ abstract class GUI @JvmOverloads constructor(
         } else event.inventory === inventory
     }
 
-    fun addItem(item: BaseItem)
+    fun addItem(item: BaseItem, end: Boolean = false)
     {
-        val slot = inventory.firstEmpty()
-        inventory.setItem(slot, item)
-        clickableItems[slot] = item
+        val slot = if (end) inventory.lastEmpty() else inventory.firstEmpty()
+        if (slot != null)
+        {
+            inventory.setItem(slot, item)
+            clickableItems[slot] = item
+        }
     }
 
-    fun addItem(item: ItemStack, stack: Boolean = true)
+    fun addItem(item: ItemStack, stack: Boolean = true, end: Boolean = false)
     {
         if (stack)
         {
             inventory.addItem(item)
         } else
         {
-            inventory.setItem(inventory.firstEmpty(), item)
+            val slot = if (end) inventory.lastEmpty() else inventory.firstEmpty()
+            if (slot != null)
+            {
+                inventory.setItem(slot, item)
+            }
         }
     }
 
