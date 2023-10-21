@@ -7,12 +7,13 @@ abstract class GUIWithPagination<T>(
     plugin: CustomPlugin,
     backPage: GUI?,
     items: List<T>,
-    itemMapper: (context: GUIWithPagination<T>, item: T) -> BaseItem,
+    getKey: (item: T) -> Int?,
+    itemMapper: (context: GUIWithPagination<T>, item: T, index: Int) -> BaseItem,
     private val page: Int = 0,
     title: String,
     nextText: String,
     previousText: String,
-    actions: (context: GUI) -> List<BaseItem>
+    actions: ((context: GUI) -> List<BaseItem>) = { emptyList() }
 ) :
     GUI(
         plugin,
@@ -21,7 +22,8 @@ abstract class GUIWithPagination<T>(
         { calculateInventorySize(items.size, page, actions(it).size + it.initSize) }
     )
 {
-    abstract fun open(player: Player, page: Int)
+    abstract fun newInstance(page: Int): GUI
+    abstract fun onPaginate(player: Player, page: Int)
 
     companion object
     {
@@ -107,7 +109,8 @@ abstract class GUIWithPagination<T>(
                     override fun onNext(player: Player, newPage: Int)
                     {
                         cancelCloseEvent = true
-                        open(player, newPage)
+                        onPaginate(player, newPage)
+                        newInstance(newPage).open(player)
                     }
                 }, true
             )
@@ -123,14 +126,20 @@ abstract class GUIWithPagination<T>(
                 override fun onPrevious(player: Player, newPage: Int)
                 {
                     cancelCloseEvent = true
-                    open(player, newPage)
+                    onPaginate(player, newPage)
+                    newInstance(newPage).open(player)
                 }
             }, true)
         }
-        val filteredItems = items.filterIndexed { i, _ -> i in start until end }
-        for (item in filteredItems)
+
+        val filteredItems = items
+                .mapNotNull { item -> getKey(item)?.let { Pair(item, it) } }
+                .sortedBy { (_, key) -> key }
+                .filterIndexed { i, _ -> i in start until end }
+
+        for ((item, key) in filteredItems)
         {
-            addItem(itemMapper(this, item))
+            addItem(itemMapper(this, item, key))
         }
     }
 }
