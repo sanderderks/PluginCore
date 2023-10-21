@@ -12,13 +12,13 @@ abstract class GUIWithPagination<T>(
     title: String,
     nextText: String,
     previousText: String,
-    otherButtonsSize: Int = 0
+    actions: (context: GUI) -> List<BaseItem>
 ) :
     GUI(
         plugin,
         backPage,
         "$title | page ${page + 1}",
-        { calculateInventorySize(items.size, page, otherButtonsSize + it) }
+        { calculateInventorySize(items.size, page, actions(it).size + it.initSize) }
     )
 {
     abstract fun open(player: Player, page: Int)
@@ -85,8 +85,12 @@ abstract class GUIWithPagination<T>(
 
     init
     {
-        val usedSlotsWithoutPagination = otherButtonsSize + if (backPage != null) 1 else 0
-        var usedSlots = 2 + usedSlotsWithoutPagination
+        for (action in actions(this))
+        {
+            addItem(action, true)
+        }
+        val usedSlotsWithoutPagination = clickableSize
+        var usedSlots = 2 + clickableSize
         val hasPreviousPage = hasPreviousPage(page)
         if (!hasPreviousPage)
         {

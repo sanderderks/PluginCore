@@ -18,23 +18,24 @@ abstract class GUI @JvmOverloads constructor(
     plugin: CustomPlugin,
     var backPage: GUI?,
     val title: String,
-    size: (initSize: Int) -> Int = { 9 },
+    size: (context: GUI) -> Int = { 9 },
     private val alwaysCancelEvent: Boolean = true,
     val hasSaveButton: Boolean = false
 ) : Listener
 {
-    private val initSize = if (hasSaveButton) 1 else 0 + if (backPage != null) 1 else 0
-    private val inventory =
-        Bukkit.createInventory(null, size(initSize), ChatColor.stripColor(title)!!)
     val clickableItems = mutableMapOf<Int, BaseItem>()
     var cancelCloseEvent = false
     var keepAlive = false
+    val initSize = if (hasSaveButton) 1 else 0 + if (backPage != null) 1 else 0
+    private val inventory =
+        Bukkit.createInventory(null, size(this), ChatColor.stripColor(title)!!)
 
     val contents: Array<ItemStack?> get() = inventory.contents
     val size get() = inventory.size
 
-    val nonClickableSize get() = contents.filterNotNull().size - clickableItems.size
-    val nonClickableSizeWithNull get() = contents.size - clickableItems.size
+    val clickableSize get() = clickableItems.size
+    val nonClickableSize get() = contents.filterNotNull().size - clickableSize
+    val nonClickableSizeWithNull get() = contents.size - clickableSize
 
     abstract fun newInstance(): GUI
 
