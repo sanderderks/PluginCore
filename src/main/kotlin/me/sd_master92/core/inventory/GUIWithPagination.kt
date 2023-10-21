@@ -7,9 +7,9 @@ abstract class GUIWithPagination<T>(
     plugin: CustomPlugin,
     backPage: GUI?,
     items: List<T>,
-    getItem: (context: GUIWithPagination<T>, item: T) -> BaseItem,
+    itemMapper: (context: GUIWithPagination<T>, item: T) -> BaseItem,
     private val page: Int = 0,
-    name: String,
+    title: String,
     nextText: String,
     previousText: String,
     otherButtonsSize: Int = 0
@@ -17,8 +17,8 @@ abstract class GUIWithPagination<T>(
     GUI(
         plugin,
         backPage,
-        "$name | page ${page + 1}",
-        calculateInventorySize(items.size, page, otherButtonsSize + if (backPage != null) 1 else 0)
+        "$title | page ${page + 1}",
+        { calculateInventorySize(items.size, page, otherButtonsSize + it) }
     )
 {
     abstract fun open(player: Player, page: Int)
@@ -126,7 +126,7 @@ abstract class GUIWithPagination<T>(
         val filteredItems = items.filterIndexed { i, _ -> i in start until end }
         for (item in filteredItems)
         {
-            addItem(getItem(this, item))
+            addItem(itemMapper(this, item))
         }
     }
 }

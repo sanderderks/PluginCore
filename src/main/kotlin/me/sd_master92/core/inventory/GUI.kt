@@ -17,13 +17,15 @@ import org.bukkit.inventory.ItemStack
 abstract class GUI @JvmOverloads constructor(
     plugin: CustomPlugin,
     var backPage: GUI?,
-    val name: String,
-    size: Int = 9,
+    val title: String,
+    size: (initSize: Int) -> Int = { 9 },
     private val alwaysCancelEvent: Boolean = true,
-    val save: Boolean = false
+    val hasSaveButton: Boolean = false
 ) : Listener
 {
-    private val inventory = Bukkit.createInventory(null, size, ChatColor.stripColor(name)!!)
+    private val initSize = if (hasSaveButton) 1 else 0 + if (backPage != null) 1 else 0
+    private val inventory =
+        Bukkit.createInventory(null, size(initSize), ChatColor.stripColor(title)!!)
     val clickableItems = mutableMapOf<Int, BaseItem>()
     var cancelCloseEvent = false
     var keepAlive = false
@@ -74,7 +76,7 @@ abstract class GUI @JvmOverloads constructor(
                 onClick(event, event.whoClicked as Player)
                 clickableItems[event.slot]?.onClick(event, event.whoClicked as Player)
             }
-        } else if (event.view.title == name && event.isShiftClick && alwaysCancelEvent)
+        } else if (event.view.title == title && event.isShiftClick && alwaysCancelEvent)
         {
             event.isCancelled = true
         }
@@ -162,9 +164,9 @@ abstract class GUI @JvmOverloads constructor(
     {
         if (backPage != null)
         {
-            setItem(inventory.size - if (save) 2 else 1, BackButton(this))
+            setItem(inventory.size - if (hasSaveButton) 2 else 1, BackButton(this))
         }
-        if (save)
+        if (hasSaveButton)
         {
             setItem(inventory.size - 1, SaveButton(this))
         }

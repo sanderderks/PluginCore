@@ -8,7 +8,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 
 abstract class ConfirmGUI(plugin: CustomPlugin, name: String, confirm: String = "Confirm", cancel: String = "Cancel") :
-    GUI(plugin, null, name, 9)
+    GUI(plugin, null, name)
 {
     abstract fun onConfirm(event: InventoryClickEvent, player: Player)
     abstract fun onCancel(event: InventoryClickEvent, player: Player)
@@ -36,7 +36,8 @@ abstract class ConfirmGUI(plugin: CustomPlugin, name: String, confirm: String = 
 
     init
     {
-        setItem(2, object : BaseItem(Material.GREEN_WOOL, ChatColor.GREEN.toString() + confirm) {
+        setItem(2, object : BaseItem(Material.GREEN_WOOL, ChatColor.GREEN.toString() + confirm)
+        {
             override fun onClick(event: InventoryClickEvent, player: Player)
             {
                 cancelCloseEvent = true
