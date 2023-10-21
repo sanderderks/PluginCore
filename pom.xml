@@ -6,7 +6,7 @@
 
     <groupId>me.sd_master92</groupId>
     <artifactId>PluginCore</artifactId>
-    <version>1.4.1</version>
+    <version>1.5.0</version>
 
     <name>PluginCore</name>
     <description>Plugin essentials</description>
