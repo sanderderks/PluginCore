@@ -156,7 +156,7 @@ abstract class GUI @JvmOverloads constructor(
         clickableItems.clear()
     }
 
-    fun open(player: Player)
+    open fun open(player: Player)
     {
         cancelCloseEvent = false
         player.openInventory(inventory)
