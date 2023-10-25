@@ -2,13 +2,14 @@ package me.sd_master92.core.inventory
 
 import me.sd_master92.core.plugin.CustomPlugin
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 
 abstract class GUIWithPagination<T>(
     plugin: CustomPlugin,
     backPage: GUI?,
     items: List<T>,
     getKey: (item: T) -> Int?,
-    itemMapper: (context: GUIWithPagination<T>, item: T, index: Int) -> BaseItem,
+    itemMapper: (context: GUIWithPagination<T>, item: T, key: Int) -> ItemStack,
     private val page: Int = 0,
     title: String,
     nextText: String,
@@ -139,7 +140,14 @@ abstract class GUIWithPagination<T>(
 
         for ((item, key) in filteredItems)
         {
-            addItem(itemMapper(this, item, key))
+            val mappedItem = itemMapper(this, item, key)
+            if (mappedItem is BaseItem)
+            {
+                addItem(mappedItem)
+            } else
+            {
+                addItem(mappedItem)
+            }
         }
     }
 }
