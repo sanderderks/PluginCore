@@ -68,6 +68,17 @@ fun String.getUuidByName(): UUID?
     return Bukkit.getOfflinePlayers().find { it.name == this }?.uniqueId
 }
 
+fun Inventory.firstEmpty(skip: Int? = null): Int
+{
+    return if (skip != null)
+    {
+        withIndex().find { (index, item) -> index >= skip && item == null }?.index ?: 0
+    } else
+    {
+        firstEmpty()
+    }
+}
+
 fun Inventory.lastEmpty(): Int?
 {
     for (i in size - 1 downTo 0)

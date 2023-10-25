@@ -14,13 +14,14 @@ abstract class GUIWithPagination<T>(
     title: String,
     nextText: String,
     previousText: String,
-    actions: ((context: GUI) -> List<BaseItem>) = { emptyList() }
+    actions: ((context: GUI) -> List<BaseItem>) = { emptyList() },
+    differentStartIndex: Int? = null
 ) :
     GUI(
         plugin,
         backPage,
         "$title | page ${page + 1}",
-        { calculateInventorySize(items.size, page, actions(it).size + it.initSize) }
+        { calculateInventorySize(items.size, page, actions(it).size + it.initSize, differentStartIndex) }
     )
 {
     abstract fun newInstance(page: Int): GUI
@@ -36,32 +37,44 @@ abstract class GUIWithPagination<T>(
             return (MAX_INVENTORY_SIZE - usedSlotsWithoutPagination)
         }
 
-        private fun precedingItems(maxItemsOnPage: Int, page: Int): Int
+        private fun precedingItems(maxItemsOnPage: Int, page: Int, differentStartIndex: Int?): Int
         {
             var precedingItems = 0
             if (page > 0)
             {
-                precedingItems += maxItemsOnPage * page - 1 - (2 * (page - 1))
+                precedingItems += maxItemsOnPage * page - (differentStartIndex ?: 0) - 1 - (2 * (page - 1))
             }
             return precedingItems
         }
 
-        private fun startIndex(usedSlotsWithoutPagination: Int, page: Int): Int
+        private fun calculateStartIndex(usedSlotsWithoutPagination: Int, page: Int, differentStartIndex: Int?): Int
         {
-            return if (page == 0) 0 else precedingItems(
+            return if (page == 0) differentStartIndex ?: 0 else precedingItems(
                 maxItemsOnPage(usedSlotsWithoutPagination),
-                page
+                page,
+                differentStartIndex ?: 0
             )
         }
 
-        private fun endIndex(inventorySize: Int, usedSlots: Int, startIndex: Int): Int
+        private fun calculateEndIndex(
+            inventorySize: Int,
+            usedSlots: Int,
+            startIndex: Int,
+            page: Int,
+            differentStartIndex: Int?
+        ): Int
         {
-            return startIndex + inventorySize - usedSlots
+            return startIndex + inventorySize - usedSlots - (if (page == 0) differentStartIndex ?: 0 else 0)
         }
 
-        private fun hasNextPage(totalItemSize: Int, inventorySize: Int, endIndex: Int): Boolean
+        private fun hasNextPage(
+            totalItemSize: Int,
+            inventorySize: Int,
+            endIndex: Int,
+            differentStartIndex: Int?
+        ): Boolean
         {
-            return inventorySize == MAX_INVENTORY_SIZE && endIndex < totalItemSize - 1
+            return inventorySize == MAX_INVENTORY_SIZE && endIndex - (differentStartIndex ?: 0) < totalItemSize - 1
         }
 
         private fun hasPreviousPage(page: Int): Boolean
@@ -69,20 +82,36 @@ abstract class GUIWithPagination<T>(
             return page > 0
         }
 
-        private fun calculateInventorySize(totalItemSize: Int, page: Int, otherButtonsSize: Int): Int
+        private fun calculateInventorySize(
+            totalItemSize: Int,
+            page: Int,
+            otherButtonsSize: Int,
+            differentStartIndex: Int? = null
+        ): Int
         {
-            val startIndex = startIndex(otherButtonsSize, page)
-            val endIndex = endIndex(MAX_INVENTORY_SIZE, otherButtonsSize + 2, startIndex)
-            if (hasNextPage(totalItemSize, MAX_INVENTORY_SIZE, endIndex))
+            val startIndex = calculateStartIndex(otherButtonsSize, page, differentStartIndex)
+            val endIndex = calculateEndIndex(
+                MAX_INVENTORY_SIZE,
+                otherButtonsSize + 2,
+                startIndex,
+                page,
+                differentStartIndex
+            )
+            if (hasNextPage(totalItemSize, MAX_INVENTORY_SIZE, endIndex, differentStartIndex))
             {
                 return MAX_INVENTORY_SIZE
             }
             val maxItemsOnPage = maxItemsOnPage(otherButtonsSize)
-            val precedingItems = precedingItems(maxItemsOnPage, page)
-            val itemSize = totalItemSize - precedingItems + otherButtonsSize + if (hasPreviousPage(page)) 1 else 0
-            val inventorySize =
+            val precedingItems = precedingItems(maxItemsOnPage, page, differentStartIndex)
+            val itemSize =
+                totalItemSize - precedingItems + otherButtonsSize + if (hasPreviousPage(page)) 1 else 0
+            var inventorySize =
                 if (itemSize % INVENTORY_ROW_SIZE == 0) itemSize else itemSize + (INVENTORY_ROW_SIZE - (itemSize % INVENTORY_ROW_SIZE))
-            return inventorySize.coerceAtLeast(INVENTORY_ROW_SIZE)
+            if (page == 0 && differentStartIndex != null)
+            {
+                inventorySize += differentStartIndex
+            }
+            return inventorySize.coerceAtLeast(INVENTORY_ROW_SIZE).coerceAtMost(MAX_INVENTORY_SIZE)
         }
     }
 
@@ -94,14 +123,14 @@ abstract class GUIWithPagination<T>(
         }
         val usedSlotsWithoutPagination = clickableSize
         var usedSlots = 2 + clickableSize
+        var startIndex = calculateStartIndex(usedSlotsWithoutPagination, page, differentStartIndex)
         val hasPreviousPage = hasPreviousPage(page)
         if (!hasPreviousPage)
         {
             usedSlots--
         }
-        val start = startIndex(usedSlotsWithoutPagination, page)
-        var end = endIndex(size, usedSlots, start)
-        val hasNextPage = hasNextPage(items.size, size, end)
+        var endIndex = calculateEndIndex(size, usedSlots, startIndex, page, differentStartIndex)
+        val hasNextPage = hasNextPage(items.size, size, endIndex, differentStartIndex)
         if (hasNextPage)
         {
             addItem(
@@ -118,7 +147,7 @@ abstract class GUIWithPagination<T>(
         } else
         {
             usedSlots--
-            end = endIndex(size, usedSlots, start)
+            endIndex = calculateEndIndex(size, usedSlots, startIndex, page, differentStartIndex)
         }
         if (hasPreviousPage)
         {
@@ -133,20 +162,28 @@ abstract class GUIWithPagination<T>(
             }, true)
         }
 
+        if (page == 0)
+        {
+            startIndex -= differentStartIndex ?: 0
+            endIndex -= differentStartIndex ?: 0
+        }
+
         val filteredItems = items
                 .mapNotNull { item -> getKey(item)?.let { Pair(item, it) } }
                 .sortedBy { (_, key) -> key }
-                .filterIndexed { i, _ -> i in start until end }
+                .filterIndexed { i, _ -> i in startIndex until endIndex }
+
+        val skip = if (page == 0) differentStartIndex else null
 
         for ((item, key) in filteredItems)
         {
             val mappedItem = itemMapper(this, item, key)
             if (mappedItem is BaseItem)
             {
-                addItem(mappedItem)
+                addItem(mappedItem, skip = skip)
             } else
             {
-                addItem(mappedItem)
+                addItem(mappedItem, skip = skip)
             }
         }
     }

@@ -1,5 +1,6 @@
 package me.sd_master92.core.inventory
 
+import me.sd_master92.core.firstEmpty
 import me.sd_master92.core.lastEmpty
 import me.sd_master92.core.plugin.CustomPlugin
 import org.bukkit.Bukkit
@@ -113,9 +114,9 @@ abstract class GUI @JvmOverloads constructor(
         } else event.inventory === inventory
     }
 
-    fun addItem(item: BaseItem, end: Boolean = false)
+    fun addItem(item: BaseItem, end: Boolean = false, skip: Int? = null)
     {
-        val slot = if (end) inventory.lastEmpty() else inventory.firstEmpty()
+        val slot = if (end) inventory.lastEmpty() else inventory.firstEmpty(skip)
         if (slot != null)
         {
             inventory.setItem(slot, item)
@@ -123,14 +124,14 @@ abstract class GUI @JvmOverloads constructor(
         }
     }
 
-    fun addItem(item: ItemStack, stack: Boolean = true, end: Boolean = false)
+    fun addItem(item: ItemStack, stack: Boolean = true, end: Boolean = false, skip: Int? = null)
     {
         if (stack)
         {
             inventory.addItem(item)
         } else
         {
-            val slot = if (end) inventory.lastEmpty() else inventory.firstEmpty()
+            val slot = if (end) inventory.lastEmpty() else inventory.firstEmpty(skip)
             if (slot != null)
             {
                 inventory.setItem(slot, item)

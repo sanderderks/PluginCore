@@ -15,10 +15,7 @@ abstract class PaginationNextAction(
     override fun onClick(event: InventoryClickEvent, player: Player)
     {
         event.isCancelled = true
-        if (currentPage.contents.none { item -> item == null || item.type == Material.AIR })
-        {
-            currentPage.cancelCloseEvent = true
-            onNext(player, page + 1)
-        }
+        currentPage.cancelCloseEvent = true
+        onNext(player, page + 1)
     }
 }
