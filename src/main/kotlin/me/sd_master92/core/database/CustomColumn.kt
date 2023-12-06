@@ -1,27 +1,33 @@
 package me.sd_master92.core.database
 
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.withContext
+
 class CustomColumn(val database: CustomDatabase, val table: CustomTable, var name: String)
 {
-    fun exists(): Boolean
+    suspend fun exists(): Boolean
     {
-        return try
+        return withContext(SupervisorJob())
         {
-            database.connection!!.metaData.getColumns(null, null, table.name, name).next()
-        } catch (e: Exception)
-        {
-            database.error(e)
-            false
+            try
+            {
+                database.connection!!.metaData.getColumns(null, null, table.name, name).next()
+            } catch (e: Exception)
+            {
+                database.error(e)
+                false
+            }
         }
     }
 
-    fun create(dataType: DataType): Boolean
+    suspend fun create(dataType: DataType): Boolean
     {
         val statement =
             database.connection!!.prepareStatement("ALTER TABLE ${table.name} ADD COLUMN $name ${dataType.value}")
-        return database.execute(statement)
+        return database.executeAsync(statement)
     }
 
-    fun createIFNotExists(dataType: DataType): Boolean
+    suspend fun createIFNotExists(dataType: DataType): Boolean
     {
         return if (!exists())
         {
@@ -29,11 +35,11 @@ class CustomColumn(val database: CustomDatabase, val table: CustomTable, var nam
         } else true
     }
 
-    fun renameOrCreate(newName: String, dataType: DataType): Boolean
+    suspend fun renameOrCreate(newName: String, dataType: DataType): Boolean
     {
         val statement =
             database.connection!!.prepareStatement("ALTER TABLE ${table.name} CHANGE $name $newName ${dataType.value}")
-        return if (database.execute(statement))
+        return if (database.executeAsync(statement))
         {
             name = newName
             true
@@ -43,12 +49,12 @@ class CustomColumn(val database: CustomDatabase, val table: CustomTable, var nam
         }
     }
 
-    fun delete(): Boolean
+    suspend fun delete(): Boolean
     {
         return if (exists())
         {
             val statement = database.connection!!.prepareStatement("ALTER TABLE ${table.name} DROP COLUMN $name")
-            database.execute(statement)
+            database.executeAsync(statement)
         } else
         {
             true

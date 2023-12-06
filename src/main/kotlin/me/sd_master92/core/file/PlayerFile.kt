@@ -1,13 +1,13 @@
 package me.sd_master92.core.file
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.sd_master92.core.getUuidByName
 import me.sd_master92.core.plugin.CustomPlugin
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.io.File
 import java.util.*
 import java.util.stream.Collectors
-import kotlin.collections.HashMap
 
 /**
  * create a new PlayerFile instance
@@ -32,7 +32,7 @@ open class PlayerFile private constructor(val uuid: UUID, private val plugin: Cu
 
     override fun delete(): Boolean
     {
-        if(super.delete())
+        if (super.delete())
         {
             ALL.remove(uuid)
             return true
@@ -89,20 +89,28 @@ open class PlayerFile private constructor(val uuid: UUID, private val plugin: Cu
     {
         private var ALL: MutableMap<UUID, PlayerFile> = HashMap()
 
-        fun init(plugin: CustomPlugin)
+        suspend fun init(plugin: CustomPlugin)
         {
-            val files = File(plugin.dataFolder.toString() + File.separator + "players").listFiles()
-            ALL = if (files != null)
-            {
-                try
+            ALL = withContext(Dispatchers.IO) {
+                val files = File(plugin.dataFolder.toString() + File.separator + "players").listFiles()
+                return@withContext if (files != null)
                 {
-                    Arrays.stream(files).map { file: File -> PlayerFile(UUID.fromString(file.name.replace(".yml", "")), plugin) }
-                            .collect(Collectors.toList()).associateBy { file -> file.uuid }.toMutableMap()
-                } catch (e: Exception)
-                {
-                    HashMap()
-                }
-            } else HashMap()
+                    try
+                    {
+                        Arrays.stream(files)
+                                .map { file: File ->
+                                    PlayerFile(
+                                        UUID.fromString(file.name.replace(".yml", "")),
+                                        plugin
+                                    )
+                                }
+                                .collect(Collectors.toList()).associateBy { file -> file.uuid }.toMutableMap()
+                    } catch (e: Exception)
+                    {
+                        HashMap()
+                    }
+                } else HashMap()
+            }
         }
 
         /**
@@ -150,7 +158,7 @@ open class PlayerFile private constructor(val uuid: UUID, private val plugin: Cu
         fun getByName(plugin: CustomPlugin, name: String): PlayerFile?
         {
             val file = ALL.values.firstOrNull { file -> file.name == name }
-            if(file != null)
+            if (file != null)
             {
                 return file
             } else

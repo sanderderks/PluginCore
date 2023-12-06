@@ -1,5 +1,7 @@
 package me.sd_master92.core.database
 
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.withContext
 import me.sd_master92.core.database.CustomColumn.DataType
 import me.sd_master92.core.setValue
 import java.sql.ResultSet
@@ -8,36 +10,46 @@ class CustomTable(
     val database: CustomDatabase, val name: String
 )
 {
-    fun exists(): Boolean
+
+    suspend fun existsAsync(): Boolean
     {
-        return try
-        {
-            database.connection!!.metaData.getTables(null, null, name, null).next()
-        } catch (e: Exception)
-        {
-            database.error(e)
-            false
+        return withContext(SupervisorJob()) {
+            try
+            {
+                database.connection!!.metaData.getTables(null, null, name, null).next()
+            } catch (e: Exception)
+            {
+                database.error(e)
+                false
+            }
         }
     }
 
-    fun create(column: String, dataType: DataType): Boolean
+    suspend fun createAsync(column: String, dataType: DataType): Boolean
     {
-        val statement = database.connection!!.prepareStatement("CREATE TABLE $name ($column ${dataType.value})")
-        return database.execute(statement)
+        return withContext(SupervisorJob()) {
+            val statement = database.connection!!.prepareStatement("CREATE TABLE $name ($column ${dataType.value})")
+            database.executeAsync(statement)
+        }
     }
 
-    fun createIFNotExists(column: String, dataType: DataType): Boolean
+    suspend fun createIFNotExistsAsync(column: String, dataType: DataType): Boolean
     {
-        return if (!exists())
-        {
-            create(column, dataType)
-        } else true
+        val exists = existsAsync()
+        return withContext(SupervisorJob()) {
+            if (!exists)
+            {
+                createAsync(column, dataType)
+            } else true
+        }
     }
 
-    fun delete(table: String): Boolean
+    suspend fun deleteAsync(table: String): Boolean
     {
-        val statement = database.connection!!.prepareStatement("DROP TABLE $table")
-        return database.execute(statement)
+        return withContext(SupervisorJob()) {
+            val statement = database.connection!!.prepareStatement("DROP TABLE $table")
+            database.executeAsync(statement)
+        }
     }
 
     fun getColumn(name: String): CustomColumn
@@ -45,58 +57,69 @@ class CustomTable(
         return CustomColumn(database, this, name)
     }
 
-    fun insertData(columns: Array<String>, values: Array<Any>): Boolean
+    suspend fun insertDataAsync(columns: Array<String>, values: Array<Any>): Boolean
     {
-        val columnsAsString = StringBuilder()
-        for (column in columns)
-        {
-            columnsAsString.append(column).append(",")
+        return withContext(SupervisorJob()) {
+            val columnsAsString = StringBuilder()
+            for (column in columns)
+            {
+                columnsAsString.append(column).append(",")
+            }
+            columnsAsString.deleteCharAt(columnsAsString.length - 1)
+
+            val placeholders = StringBuilder()
+            for (value in values)
+            {
+                placeholders.append("?,")
+            }
+            placeholders.deleteCharAt(placeholders.length - 1)
+
+            val statement =
+                database.connection!!.prepareStatement("INSERT INTO $name ($columnsAsString) VALUES ($placeholders)")
+            var i = 1
+            for (value in values)
+            {
+                statement.setValue(i, value)
+                i++
+            }
+            database.executeAsync(statement)
         }
-        columnsAsString.deleteCharAt(columnsAsString.length - 1)
+    }
 
-        val placeholders = StringBuilder()
-        for (value in values)
-        {
-            placeholders.append("?,")
+    suspend fun updateDataAsync(whereColumn: String, whereValue: Any, updateColumn: String, updateValue: Any?): Boolean
+    {
+        return withContext(SupervisorJob()) {
+            val statement =
+                database.connection!!.prepareStatement("UPDATE $name SET $updateColumn=? WHERE $whereColumn=?")
+            statement.setValue(1, updateValue)
+            statement.setValue(2, whereValue)
+            database.executeAsync(statement)
         }
-        placeholders.deleteCharAt(placeholders.length - 1)
+    }
 
-        val statement =
-            database.connection!!.prepareStatement("INSERT INTO $name ($columnsAsString) VALUES ($placeholders)")
-        var i = 1
-        for (value in values)
-        {
-            statement.setValue(i, value)
-            i++
+    suspend fun getDataAsync(column: String, value: Any): ResultSet?
+    {
+        return withContext(SupervisorJob()) {
+            val statement = database.connection!!.prepareStatement("SELECT * FROM $name WHERE $column=?")
+            statement.setValue(1, value)
+            database.queryAsync(statement)
         }
-        return database.execute(statement)
     }
 
-    fun updateData(whereColumn: String, whereValue: Any, updateColumn: String, updateValue: Any?): Boolean
+    suspend fun getAllAsync(): ResultSet?
     {
-        val statement = database.connection!!.prepareStatement("UPDATE $name SET $updateColumn=? WHERE $whereColumn=?")
-        statement.setValue(1, updateValue)
-        statement.setValue(2, whereValue)
-        return database.execute(statement)
+        return withContext(SupervisorJob()) {
+            val statement = database.connection!!.prepareStatement("SELECT * FROM $name")
+            database.queryAsync(statement)
+        }
     }
 
-    fun getData(column: String, value: Any): ResultSet?
+    suspend fun deleteDataAsync(column: String, value: Any): Boolean
     {
-        val statement = database.connection!!.prepareStatement("SELECT * FROM $name WHERE $column=?")
-        statement.setValue(1, value)
-        return database.query(statement)
-    }
-
-    fun getAll(): ResultSet?
-    {
-        val statement = database.connection!!.prepareStatement("SELECT * FROM $name")
-        return database.query(statement)
-    }
-
-    fun deleteData(column: String, value: Any): Boolean
-    {
-        val statement = database.connection!!.prepareStatement("DELETE FROM $name WHERE $column=?")
-        statement.setValue(1, value)
-        return database.execute(statement)
+        return withContext(SupervisorJob()) {
+            val statement = database.connection!!.prepareStatement("DELETE FROM $name WHERE $column=?")
+            statement.setValue(1, value)
+            database.executeAsync(statement)
+        }
     }
 }

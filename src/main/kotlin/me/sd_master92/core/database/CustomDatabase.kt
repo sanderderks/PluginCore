@@ -1,11 +1,9 @@
 package me.sd_master92.core.database
 
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.withContext
 import me.sd_master92.core.file.CustomFile
-import java.sql.Connection
-import java.sql.DriverManager
-import java.sql.PreparedStatement
-import java.sql.ResultSet
-import java.sql.SQLException
+import java.sql.*
 
 class CustomDatabase
 {
@@ -73,36 +71,34 @@ class CustomDatabase
             false
         }
 
-    fun execute(statement: PreparedStatement): Boolean
+    suspend fun executeAsync(statement: PreparedStatement): Boolean
     {
-        return try
-        {
-            statement.execute()
-            true
-        } catch (e: Exception)
-        {
-            print(statement)
-            error(e)
-            false
-        } finally
-        {
-            statement.close()
+        return withContext(SupervisorJob()) {
+            try
+            {
+                statement.execute()
+                true
+            } catch (e: Exception)
+            {
+                print(statement)
+                error(e)
+                false
+            }
         }
     }
 
-    fun query(statement: PreparedStatement): ResultSet?
+    suspend fun queryAsync(statement: PreparedStatement): ResultSet?
     {
-        return try
-        {
-            statement.executeQuery()
-        } catch (e: Exception)
-        {
-            print(statement)
-            error(e)
-            null
-        } finally
-        {
-            statement.close()
+        return withContext(SupervisorJob()) {
+            try
+            {
+                statement.executeQuery()
+            } catch (e: Exception)
+            {
+                print(statement)
+                error(e)
+                null
+            }
         }
     }
 
