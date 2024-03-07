@@ -13,8 +13,8 @@ abstract class SimpleSubCommand(val name: String)
         private set
     private var mustBePlayer = false
 
-    abstract fun onCommand(sender: CommandSender, args: Array<String>)
-    abstract fun onCommand(player: Player, args: Array<String>)
+    abstract suspend fun onCommand(sender: CommandSender, args: Array<out String>)
+    abstract suspend fun onCommand(player: Player, args: Array<out String>)
 
     fun withArguments(minArgs: Int, usage: String): SimpleSubCommand
     {

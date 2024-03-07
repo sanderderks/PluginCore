@@ -1,8 +1,9 @@
 package me.sd_master92.core.command
 
+import com.github.shynixn.mccoroutine.bukkit.SuspendingCommandExecutor
+import com.github.shynixn.mccoroutine.bukkit.setSuspendingExecutor
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
-import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
 import org.bukkit.entity.Player
@@ -12,7 +13,7 @@ import org.bukkit.plugin.java.JavaPlugin
 abstract class SimpleCommand @JvmOverloads constructor(
     private val plugin: JavaPlugin, private val name: String, private val allowZeroArgs: Boolean = true,
     vararg subCommands: SimpleSubCommand
-) : CommandExecutor, TabCompleter
+) : SuspendingCommandExecutor, TabCompleter
 {
     private var subCommands: Map<String, SimpleSubCommand>
     private var mustBePlayer = false
@@ -25,15 +26,20 @@ abstract class SimpleCommand @JvmOverloads constructor(
         val command = plugin.getCommand(name)
         if (command != null)
         {
-            command.setExecutor(this)
+            command.setSuspendingExecutor(this)
             usage += command.usage
         }
     }
 
-    abstract fun onCommand(sender: CommandSender, args: Array<String>)
-    abstract fun onCommand(player: Player, args: Array<String>)
+    abstract suspend fun onCommand(sender: CommandSender, args: Array<out String>)
+    abstract suspend fun onCommand(player: Player, args: Array<out String>)
 
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean
+    override suspend fun onCommand(
+        sender: CommandSender,
+        command: Command,
+        label: String,
+        args: Array<out String>
+    ): Boolean
     {
         if (hasPermission(sender, command.permission) && validateArguments(sender, label, args))
         {
@@ -113,7 +119,7 @@ abstract class SimpleCommand @JvmOverloads constructor(
         return false
     }
 
-    private fun validateArguments(sender: CommandSender, label: String, args: Array<String>): Boolean
+    private suspend fun validateArguments(sender: CommandSender, label: String, args: Array<out String>): Boolean
     {
         if (args.isEmpty() && allowZeroArgs)
         {

@@ -1,5 +1,6 @@
 package me.sd_master92.core.inventory
 
+import com.github.shynixn.mccoroutine.bukkit.launch
 import me.sd_master92.core.plugin.CustomPlugin
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -9,7 +10,7 @@ abstract class GUIWithPagination<T>(
     backPage: GUI?,
     items: List<T>,
     getKey: (item: T) -> Int?,
-    itemMapper: (context: GUIWithPagination<T>, item: T, key: Int) -> ItemStack,
+    itemMapper: suspend (context: GUIWithPagination<T>, item: T, key: Int) -> ItemStack,
     private val page: Int = 0,
     title: String,
     nextText: String,
@@ -177,13 +178,16 @@ abstract class GUIWithPagination<T>(
 
         for ((item, key) in filteredItems)
         {
-            val mappedItem = itemMapper(this, item, key)
-            if (mappedItem is BaseItem)
-            {
-                addItem(mappedItem, skip = skip)
-            } else
-            {
-                addItem(mappedItem, skip = skip)
+            val current = this
+            plugin.launch {
+                val mappedItem = itemMapper(current, item, key)
+                if (mappedItem is BaseItem)
+                {
+                    addItem(mappedItem, skip = skip)
+                } else
+                {
+                    addItem(mappedItem, skip = skip)
+                }
             }
         }
     }

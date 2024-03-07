@@ -1,5 +1,7 @@
 package me.sd_master92.core.plugin
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.sd_master92.core.errorLog
 import me.sd_master92.core.file.CustomFile
 import me.sd_master92.core.infoLog
@@ -23,6 +25,7 @@ abstract class CustomPlugin @JvmOverloads constructor(
     val version = description.version
     val author = description.authors[0] ?: "sd_master92"
 
+    private var latestVersion: String = "1.0"
     private var versionLastChecked: Calendar? = null
 
     protected abstract fun enable()
@@ -123,29 +126,29 @@ abstract class CustomPlugin @JvmOverloads constructor(
         return VersionStatus.LATEST
     }
 
-    var latestVersion: String = "1.0"
-        private set
-        get()
+    suspend fun getLatestVersion(): String
+    {
+        if (versionLastChecked == null
+            || Calendar.getInstance()[Calendar.DAY_OF_YEAR] != versionLastChecked!![Calendar.DAY_OF_YEAR]
+            || Calendar.getInstance()[Calendar.HOUR_OF_DAY] - versionLastChecked!![Calendar.HOUR_OF_DAY] >= 1
+        )
         {
-            if (versionLastChecked == null
-                || Calendar.getInstance()[Calendar.DAY_OF_YEAR] != versionLastChecked!![Calendar.DAY_OF_YEAR]
-                || Calendar.getInstance()[Calendar.HOUR_OF_DAY] - versionLastChecked!![Calendar.HOUR_OF_DAY] >= 1
-            )
+            latestVersion = try
             {
-                latestVersion = try
-                {
+                withContext(Dispatchers.IO) {
                     val connection =
                         URL("https://api.spigotmc.org/legacy/update.php?resource=$spigot").openConnection() as HttpsURLConnection
                     connection.requestMethod = "GET"
                     BufferedReader(InputStreamReader(connection.inputStream)).readLine()
-                } catch (e: Exception)
-                {
-                    "1.0"
                 }
-                versionLastChecked = Calendar.getInstance()
+            } catch (e: Exception)
+            {
+                "1.0"
             }
-            return field;
+            versionLastChecked = Calendar.getInstance()
         }
+        return latestVersion
+    }
 
     companion object
     {
