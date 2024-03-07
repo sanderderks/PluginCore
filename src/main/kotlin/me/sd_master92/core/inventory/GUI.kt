@@ -1,5 +1,7 @@
 package me.sd_master92.core.inventory
 
+import me.sd_master92.core.firstEmpty
+import me.sd_master92.core.lastEmpty
 import me.sd_master92.core.plugin.CustomPlugin
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -16,22 +18,25 @@ import org.bukkit.inventory.ItemStack
 abstract class GUI @JvmOverloads constructor(
     plugin: CustomPlugin,
     var backPage: GUI?,
-    val name: String,
-    size: Int = 9,
+    val title: String,
+    size: (context: GUI) -> Int = { 9 },
     private val alwaysCancelEvent: Boolean = true,
-    val save: Boolean = false
+    val hasSaveButton: Boolean = false
 ) : Listener
 {
-    private val inventory = Bukkit.createInventory(null, size, ChatColor.stripColor(name)!!)
     val clickableItems = mutableMapOf<Int, BaseItem>()
     var cancelCloseEvent = false
     var keepAlive = false
+    val initSize = if (hasSaveButton) 1 else 0 + if (backPage != null) 1 else 0
+    private val inventory =
+        Bukkit.createInventory(null, size(this), ChatColor.stripColor(title)!!)
 
     val contents: Array<ItemStack?> get() = inventory.contents
     val size get() = inventory.size
 
-    val nonClickableSize get() = contents.filterNotNull().size - clickableItems.size
-    val nonClickableSizeWithNull get() = contents.size - clickableItems.size
+    val clickableSize get() = clickableItems.size
+    val nonClickableSize get() = contents.filterNotNull().size - clickableSize
+    val nonClickableSizeWithNull get() = contents.size - clickableSize
 
     abstract fun newInstance(): GUI
 
@@ -73,7 +78,7 @@ abstract class GUI @JvmOverloads constructor(
                 onClick(event, event.whoClicked as Player)
                 clickableItems[event.slot]?.onClick(event, event.whoClicked as Player)
             }
-        } else if (event.view.title == name && event.isShiftClick && alwaysCancelEvent)
+        } else if (event.view.title == title && event.isShiftClick && alwaysCancelEvent)
         {
             event.isCancelled = true
         }
@@ -109,21 +114,28 @@ abstract class GUI @JvmOverloads constructor(
         } else event.inventory === inventory
     }
 
-    fun addItem(item: BaseItem)
+    fun addItem(item: BaseItem, end: Boolean = false, skip: Int? = null)
     {
-        val slot = inventory.firstEmpty()
-        inventory.setItem(slot, item)
-        clickableItems[slot] = item
+        val slot = if (end) inventory.lastEmpty() else inventory.firstEmpty(skip)
+        if (slot != null)
+        {
+            inventory.setItem(slot, item)
+            clickableItems[slot] = item
+        }
     }
 
-    fun addItem(item: ItemStack, stack: Boolean = true)
+    fun addItem(item: ItemStack, stack: Boolean = true, end: Boolean = false, skip: Int? = null)
     {
         if (stack)
         {
             inventory.addItem(item)
         } else
         {
-            inventory.setItem(inventory.firstEmpty(), item)
+            val slot = if (end) inventory.lastEmpty() else inventory.firstEmpty(skip)
+            if (slot != null)
+            {
+                inventory.setItem(slot, item)
+            }
         }
     }
 
@@ -144,7 +156,7 @@ abstract class GUI @JvmOverloads constructor(
         clickableItems.clear()
     }
 
-    fun open(player: Player)
+    open fun open(player: Player)
     {
         cancelCloseEvent = false
         player.openInventory(inventory)
@@ -154,9 +166,9 @@ abstract class GUI @JvmOverloads constructor(
     {
         if (backPage != null)
         {
-            setItem(inventory.size - if (save) 2 else 1, BackButton(this))
+            setItem(inventory.size - if (hasSaveButton) 2 else 1, BackButton(this))
         }
-        if (save)
+        if (hasSaveButton)
         {
             setItem(inventory.size - 1, SaveButton(this))
         }
