@@ -27,6 +27,7 @@ abstract class SimpleCommand @JvmOverloads constructor(
         if (command != null)
         {
             command.setSuspendingExecutor(this)
+            command.tabCompleter = this
             usage += command.usage
         }
     }
@@ -64,13 +65,13 @@ abstract class SimpleCommand @JvmOverloads constructor(
         if (cmd.name == name)
         {
             return this.subCommands.values
-                    .filter { subCommand ->
-                        subCommand.permission?.let { sender.hasPermission(it) } ?: true
-                    }
-                    .filter { subCommand -> !subCommand.mustBePlayer() || sender is Player }
-                    .map { subCommand -> subCommand.name }
-                    .toMutableList()
-                    .ifEmpty { null }
+                .filter { subCommand ->
+                    subCommand.permission?.let { sender.hasPermission(it) } ?: true
+                }
+                .filter { subCommand -> !subCommand.mustBePlayer() || sender is Player }
+                .map { subCommand -> subCommand.name }
+                .toMutableList()
+                .ifEmpty { null }
         }
         return null
     }
