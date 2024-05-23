@@ -1,6 +1,7 @@
 package me.sd_master92.core.file
 
 import me.sd_master92.core.plugin.CustomPlugin
+import me.sd_master92.core.translateAlternateColorCodes
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.configuration.file.YamlConfiguration
@@ -288,7 +289,7 @@ open class CustomFile(folder: File, name: String, plugin: CustomPlugin) : YamlCo
         var message = getString(path.lowercase())
         if (message != null)
         {
-            message = ChatColor.translateAlternateColorCodes('&', message)
+            message = message.translateAlternateColorCodes()
             for (placeholder in placeholders.keys)
             {
                 message = message!!.replace(placeholder, placeholders[placeholder]!!)
@@ -316,7 +317,7 @@ open class CustomFile(folder: File, name: String, plugin: CustomPlugin) : YamlCo
         val messages = getStringList(path.lowercase())
         for (i in messages.indices)
         {
-            var message = ChatColor.translateAlternateColorCodes('&', messages[i])
+            var message = messages[i].translateAlternateColorCodes()
             for (placeholder in placeholders.keys)
             {
                 message = if (replaceFirst)

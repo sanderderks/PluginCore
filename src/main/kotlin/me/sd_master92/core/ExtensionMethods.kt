@@ -9,6 +9,8 @@ import org.bukkit.inventory.ItemStack
 import java.sql.PreparedStatement
 import java.sql.Types
 import java.util.*
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 fun String.appendWhenTrue(value: Boolean, append: String): String
 {
@@ -26,6 +28,28 @@ fun Boolean.reverseWhenTrue(value: Boolean): Boolean
         return !this
     }
     return this
+}
+
+fun String.translateAlternateColorCodes(): String
+{
+    var message = this
+    val pattern = Pattern.compile("&#[a-fA-F0-9]{6}")
+    var matcher: Matcher = pattern.matcher(message)
+
+    while (matcher.find())
+    {
+        val colorCode = message.substring(matcher.start(), matcher.end())
+        val color = colorCode.substring(1)
+        try
+        {
+            message = message.replace(colorCode, "" + net.md_5.bungee.api.ChatColor.of(color))
+        } catch (_: Exception)
+        {
+        }
+        matcher = pattern.matcher(message)
+    }
+
+    return ChatColor.translateAlternateColorCodes('&', message)
 }
 
 fun Array<ItemStack?>.withAir(): Array<ItemStack?>
