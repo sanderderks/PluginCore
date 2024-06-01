@@ -16,7 +16,8 @@ abstract class GUIWithPagination<T>(
     nextText: String,
     previousText: String,
     actions: ((context: GUI) -> List<BaseItem>) = { emptyList() },
-    differentStartIndex: Int? = null
+    differentStartIndex: Int? = null,
+    sortedByKey: Boolean = true
 ) :
     GUI(
         plugin,
@@ -170,9 +171,12 @@ abstract class GUIWithPagination<T>(
         }
 
         val filteredItems = items
-                .mapNotNull { item -> getKey(item)?.let { Pair(item, it) } }
-                .sortedBy { (_, key) -> key }
-                .filterIndexed { i, _ -> i in startIndex until endIndex }
+            .mapNotNull { item -> getKey(item)?.let { Pair(item, it) } }
+            .let {
+                if (sortedByKey) it.sortedBy { (_, key) -> key } else it
+            }
+            .filterIndexed { i, _ -> i in startIndex until endIndex }
+
 
         val skip = if (page == 0) differentStartIndex else null
 
