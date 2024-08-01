@@ -98,13 +98,13 @@ open class PlayerFile private constructor(val uuid: UUID, private val plugin: Cu
                     try
                     {
                         Arrays.stream(files)
-                                .map { file: File ->
-                                    PlayerFile(
-                                        UUID.fromString(file.name.replace(".yml", "")),
-                                        plugin
-                                    )
-                                }
-                                .collect(Collectors.toList()).associateBy { file -> file.uuid }.toMutableMap()
+                            .map { file: File ->
+                                PlayerFile(
+                                    UUID.fromString(file.name.replace(".yml", "")),
+                                    plugin
+                                )
+                            }
+                            .collect(Collectors.toList()).associateBy { file -> file.uuid }.toMutableMap()
                     } catch (e: Exception)
                     {
                         HashMap()
@@ -144,9 +144,12 @@ open class PlayerFile private constructor(val uuid: UUID, private val plugin: Cu
          * @param player player
          * @return PlayerFile or null
          */
-        fun getByName(plugin: CustomPlugin, player: Player): PlayerFile
+        fun getByName(plugin: CustomPlugin, player: Player, ignoreCase: Boolean = false): PlayerFile
         {
-            return ALL.values.firstOrNull { file -> file.name == player.name } ?: PlayerFile(player, plugin)
+            return ALL.values.firstOrNull { file -> file.name.equals(player.name, ignoreCase) } ?: PlayerFile(
+                player,
+                plugin
+            )
         }
 
         /**
@@ -155,9 +158,9 @@ open class PlayerFile private constructor(val uuid: UUID, private val plugin: Cu
          * @param name   player name
          * @return PlayerFile or null
          */
-        fun getByName(plugin: CustomPlugin, name: String): PlayerFile?
+        fun getByName(plugin: CustomPlugin, name: String, ignoreCase: Boolean = false): PlayerFile?
         {
-            val file = ALL.values.firstOrNull { file -> file.name == name }
+            val file = ALL.values.firstOrNull { file -> file.name.equals(name, ignoreCase) }
             if (file != null)
             {
                 return file
