@@ -15,7 +15,11 @@ import java.util.stream.Collectors
  * @param uuid   uuid of this player
  * @param plugin main plugin class
  */
-open class PlayerFile private constructor(val uuid: UUID, private val plugin: CustomPlugin) :
+open class PlayerFile private constructor(
+    val uuid: UUID,
+    private val plugin: CustomPlugin,
+    private val _name: String? = null
+) :
     CustomFile(File(plugin.dataFolder.toString() + File.separator + "players"), "$uuid.yml", plugin)
 {
     /**
@@ -25,10 +29,7 @@ open class PlayerFile private constructor(val uuid: UUID, private val plugin: Cu
      * @param player the player
      * @param plugin main plugin class
      */
-    private constructor(player: Player, plugin: CustomPlugin) : this(player.uniqueId, plugin)
-    {
-        name = player.name
-    }
+    private constructor(player: Player, plugin: CustomPlugin) : this(player.uniqueId, plugin, player.name)
 
     override fun delete(): Boolean
     {
@@ -80,9 +81,28 @@ open class PlayerFile private constructor(val uuid: UUID, private val plugin: Cu
         return saveConfig()
     }
 
+    /**
+     * save the name of the player if it has changed
+     *
+     * @param name player name
+     * @return successful or not
+     */
+    fun setNameIfChanged(name: String): Boolean
+    {
+        if (getName() != name)
+        {
+            return setName(name)
+        }
+        return true
+    }
+
     private fun init()
     {
         ALL[uuid] = this
+        if (_name != null)
+        {
+            setNameIfChanged(_name)
+        }
     }
 
     companion object
@@ -120,9 +140,9 @@ open class PlayerFile private constructor(val uuid: UUID, private val plugin: Cu
          * @param plugin main plugin class
          * @return PlayerFile or null
          */
-        fun getByUuid(plugin: CustomPlugin, uuid: UUID): PlayerFile
+        fun getByUuid(plugin: CustomPlugin, uuid: UUID, name: String? = null): PlayerFile
         {
-            return ALL.getOrDefault(uuid, PlayerFile(uuid, plugin))
+            return ALL.getOrDefault(uuid, PlayerFile(uuid, plugin, name))
         }
 
         /**
@@ -134,7 +154,7 @@ open class PlayerFile private constructor(val uuid: UUID, private val plugin: Cu
          */
         fun getByUuid(plugin: CustomPlugin, player: Player): PlayerFile
         {
-            return ALL.getOrDefault(player.uniqueId, PlayerFile(player, plugin))
+            return getByUuid(plugin, player.uniqueId, player.name)
         }
 
         /**
