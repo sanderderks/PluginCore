@@ -25,7 +25,6 @@ abstract class BaseItem(mat: Material, name: String? = null, lore: String? = nul
         val meta = itemMeta
         if(meta != null)
         {
-            meta.lore = null
             meta.lore = listOf(*lore.split(";".toRegex()).toTypedArray())
         }
         itemMeta = meta

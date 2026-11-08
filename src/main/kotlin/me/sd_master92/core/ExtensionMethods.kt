@@ -42,7 +42,10 @@ fun String.translateAlternateColorCodes(): String
         val color = colorCode.substring(1)
         try
         {
-            message = message.replace(colorCode, "" + net.md_5.bungee.api.ChatColor.of(color))
+            val chatColorClass = Class.forName("net.md_5.bungee.api.ChatColor")
+            val ofMethod = chatColorClass.getMethod("of", java.awt.Color::class.java)
+            val chatColor = ofMethod.invoke(null, color)
+            message = message.replace(colorCode, "" + chatColor)
         } catch (_: Exception)
         {
         }
