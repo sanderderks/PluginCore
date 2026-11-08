@@ -13,11 +13,23 @@ abstract class BaseItem(mat: Material, name: String? = null, lore: String? = nul
 
     abstract fun onClick(event: InventoryClickEvent, player: Player)
 
+    private fun ItemMeta.applyItemFlags()
+    {
+        addItemFlags(
+            ItemFlag.HIDE_ENCHANTS,
+            ItemFlag.HIDE_ATTRIBUTES,
+            ItemFlag.HIDE_UNBREAKABLE,
+            ItemFlag.HIDE_DESTROYS,
+            ItemFlag.HIDE_PLACED_ON,
+            ItemFlag.HIDE_POTION_EFFECTS
+        )
+    }
+
     fun setName(name: String)
     {
         val meta = itemMeta ?: return
         meta.setDisplayName(name)
-        meta.addItemFlags(*ItemFlag.entries.toTypedArray())
+        meta.applyItemFlags()
         itemMeta = meta
     }
 
@@ -25,7 +37,7 @@ abstract class BaseItem(mat: Material, name: String? = null, lore: String? = nul
     {
         val meta = itemMeta ?: return
         meta.lore = listOf(*lore.split(";".toRegex()).toTypedArray())
-        meta.addItemFlags(*ItemFlag.entries.toTypedArray())
+        meta.applyItemFlags()
         itemMeta = meta
     }
 
@@ -35,7 +47,7 @@ abstract class BaseItem(mat: Material, name: String? = null, lore: String? = nul
         val newLore = if(meta.hasLore()) meta.lore!!.toMutableList() else mutableListOf()
         newLore.addAll(listOf(*lore.split(";".toRegex()).toTypedArray()))
         meta.lore = newLore
-        meta.addItemFlags(*ItemFlag.entries.toTypedArray())
+        meta.applyItemFlags()
         itemMeta = meta
     }
 
@@ -43,7 +55,7 @@ abstract class BaseItem(mat: Material, name: String? = null, lore: String? = nul
     {
         val meta = itemMeta ?: return
         meta.addEnchant(Enchantment.LUCK, 1, true)
-        meta.addItemFlags(*ItemFlag.entries.toTypedArray())
+        meta.applyItemFlags()
         itemMeta = meta
     }
 
@@ -56,7 +68,7 @@ abstract class BaseItem(mat: Material, name: String? = null, lore: String? = nul
             lore?.let { meta.lore = it.split(";".toRegex()) }
             if(enchanted) { meta.addEnchant(Enchantment.LUCK, 1, true) }
             
-            meta.addItemFlags(*ItemFlag.entries.toTypedArray())
+            meta.applyItemFlags()
             itemMeta = meta
         }
     }
