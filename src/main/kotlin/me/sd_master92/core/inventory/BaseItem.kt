@@ -15,48 +15,49 @@ abstract class BaseItem(mat: Material, name: String? = null, lore: String? = nul
 
     fun setName(name: String)
     {
-        val meta = itemMeta
-        meta?.setDisplayName(name)
+        val meta = itemMeta ?: return
+        meta.setDisplayName(name)
+        meta.addItemFlags(*ItemFlag.entries.toTypedArray())
         itemMeta = meta
     }
 
     fun setLore(lore: String)
     {
-        val meta = itemMeta
-        if(meta != null)
-        {
-            meta.lore = listOf(*lore.split(";".toRegex()).toTypedArray())
-        }
+        val meta = itemMeta ?: return
+        meta.lore = listOf(*lore.split(";".toRegex()).toTypedArray())
+        meta.addItemFlags(*ItemFlag.entries.toTypedArray())
         itemMeta = meta
     }
 
     fun addLore(lore: String)
     {
-        val meta = itemMeta
-        if(meta != null)
-        {
-            val newLore = if(meta.hasLore()) meta.lore!! else mutableListOf()
-            newLore.addAll(listOf(*lore.split(";".toRegex()).toTypedArray()))
-            meta.lore = newLore
-        }
+        val meta = itemMeta ?: return
+        val newLore = if(meta.hasLore()) meta.lore!!.toMutableList() else mutableListOf()
+        newLore.addAll(listOf(*lore.split(";".toRegex()).toTypedArray()))
+        meta.lore = newLore
+        meta.addItemFlags(*ItemFlag.entries.toTypedArray())
         itemMeta = meta
     }
 
     fun setEnchanted()
     {
-        val meta = itemMeta
-        meta?.addEnchant(Enchantment.LUCK, 1, true)
+        val meta = itemMeta ?: return
+        meta.addEnchant(Enchantment.LUCK, 1, true)
+        meta.addItemFlags(*ItemFlag.entries.toTypedArray())
         itemMeta = meta
     }
 
     init
     {
-        name?.let { setName(name) }
-        lore?.let { setLore(lore) }
-        if(enchanted) { setEnchanted() }
-
         val meta = itemMeta
-        meta?.addItemFlags(*ItemFlag.values())
-        itemMeta = meta
+        if(meta != null)
+        {
+            name?.let { meta.setDisplayName(it) }
+            lore?.let { meta.lore = it.split(";".toRegex()) }
+            if(enchanted) { meta.addEnchant(Enchantment.LUCK, 1, true) }
+            
+            meta.addItemFlags(*ItemFlag.entries.toTypedArray())
+            itemMeta = meta
+        }
     }
 }
